@@ -7,13 +7,16 @@ const createTransporter = () => {
 
   if (user && pass) {
     return nodemailer.createTransport({
-      service: 'gmail',
       host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // true for 465, false for 587
+      port: 465,
+      secure: true, // Port 465 SSL
+      family: 4,    // FORCE IPv4 to avoid ENETUNREACH IPv6 error on Render cloud servers
       auth: {
         user: user,
         pass: pass
+      },
+      tls: {
+        rejectUnauthorized: false
       }
     });
   }
