@@ -1,0 +1,170 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_state_provider.dart';
+import '../theme/app_theme.dart';
+import '../widgets/sweezen_header.dart';
+import '../widgets/ask_sweezen_sheet.dart';
+import 'home_tab.dart';
+import 'projects_tab.dart';
+import 'donate_tab.dart';
+import 'volunteer_tab.dart';
+import 'profile_tab.dart';
+import 'events_screen.dart';
+import 'humanity_card_screen.dart';
+import 'impact_map_screen.dart';
+import 'communication_screen.dart';
+import 'reports_screen.dart';
+import 'login_screen.dart';
+
+class MainShellScreen extends StatefulWidget {
+  const MainShellScreen({Key? key}) : super(key: key);
+
+  @override
+  State<MainShellScreen> createState() => _MainShellScreenState();
+}
+
+class _MainShellScreenState extends State<MainShellScreen> {
+  int _currentIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  void _openAiChatbot() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const AskSweezenSheet(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = Provider.of<AppStateProvider>(context);
+
+    final List<Widget> tabs = [
+      HomeTab(onNavigateTab: _onTabTapped),
+      ProjectsTab(onNavigateTab: _onTabTapped),
+      const DonateTab(),
+      const VolunteerTab(),
+      const ProfileTab(),
+    ];
+
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: SweezenHeader(scaffoldKey: _scaffoldKey),
+      drawer: Drawer(
+        backgroundColor: AppTheme.primaryNavy,
+        child: Column(
+          children: [
+            // Drawer Header
+            DrawerHeader(
+              decoration: const BoxDecoration(color: AppTheme.cardNavy),
+              child: Row(
+                children: [
+                  Image.asset('assets/images/logo.png', height: 48, errorBuilder: (c, e, s) => const Icon(Icons.shield, color: AppTheme.amberGold, size: 40)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text('SWEEZEN', style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 1)),
+                        Text('FOUNDATION', style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 2)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Drawer Items
+            _buildDrawerItem(Icons.event, 'Events & Conclaves', () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen()));
+            }),
+            _buildDrawerItem(Icons.qr_code_2, 'Humanity Smart ID', () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const HumanityCardScreen()));
+            }),
+            _buildDrawerItem(Icons.map, 'Impact Map & Transparency', () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactMapScreen()));
+            }),
+            _buildDrawerItem(Icons.campaign, 'Communication Center', () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunicationScreen()));
+            }),
+            _buildDrawerItem(Icons.picture_as_pdf, 'Reports & Media', () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
+            }),
+            const Divider(color: Colors.white12),
+
+            _buildDrawerItem(Icons.smart_toy, 'Ask Sweezen AI Assistant', () {
+              Navigator.pop(context);
+              _openAiChatbot();
+            }, isGold: true),
+
+            const Spacer(),
+            _buildDrawerItem(Icons.logout, 'Logout Account', () {
+              state.logoutUser();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                (route) => false,
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: tabs,
+      ),
+
+      // Floating AI Chatbot Action Button
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppTheme.amberGold,
+        foregroundColor: Colors.black,
+        elevation: 6,
+        icon: const Icon(Icons.smart_toy),
+        label: const Text('Ask Sweezen AI', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        onPressed: _openAiChatbot,
+      ),
+
+      // Bottom Navigation Bar
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_tree), label: 'Projects'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Donate'),
+          BottomNavigationBarItem(icon: Icon(Icons.volunteer_activism), label: 'Volunteer'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap, {bool isGold = false}) {
+    return ListTile(
+      leading: Icon(icon, color: isGold ? AppTheme.amberGold : AppTheme.goldAccent),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isGold ? AppTheme.amberGold : Colors.white,
+          fontWeight: isGold ? FontWeight.bold : FontWeight.normal,
+          fontSize: 14,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+}
