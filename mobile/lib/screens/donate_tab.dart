@@ -16,8 +16,8 @@ class DonateTab extends StatefulWidget {
 
 class _DonateTabState extends State<DonateTab> {
   final TextEditingController _amountController = TextEditingController(text: '1000');
-  final TextEditingController _nameController = TextEditingController(text: 'Aarav Sharma');
-  final TextEditingController _emailController = TextEditingController(text: 'aarav@sweezenfoundation.org');
+  final TextEditingController _nameController = TextEditingController(text: 'Sheetal');
+  final TextEditingController _emailController = TextEditingController(text: 'sheetal@sweezenfoundation.org');
   final TextEditingController _panController = TextEditingController(text: 'ABCDE1234F');
   final ScrollController _scrollController = ScrollController();
 

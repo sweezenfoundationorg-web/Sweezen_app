@@ -18,10 +18,11 @@ class AppStateProvider extends ChangeNotifier {
   ];
 
   Map<String, String> _impactMetrics = {
-    'total_projects': '25+',
-    'beneficiaries': '48,200+',
-    'volunteers': '1,240+',
-    'funds_raised': '₹4.82 Cr'
+    'total_projects': '2+',
+    'beneficiaries': '211+',
+    'volunteers': '7+',
+    'districts': '12+',
+    'funds_raised': '₹14,311'
   };
 
   bool _onboardingCompleted = false;
@@ -49,80 +50,74 @@ class AppStateProvider extends ChangeNotifier {
   }
 
   void _initDefaults() {
-    // Default Volunteer User Profile
+    // Default Volunteer/Director Profile
     _currentUser = UserModel(
       id: 1,
-      name: 'Aarav Sharma',
-      email: 'aarav@sweezenfoundation.org',
-      phone: '+91 9876543210',
-      role: 'Volunteer',
-      profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-      skills: ['Field Work', 'First Aid', 'Teaching', 'Hindi Translation'],
-      interests: ['Healthcare', 'Education'],
-      location: 'Mumbai, Maharashtra',
-      availability: 'Weekends (Sat - Sun)',
-      impactPoints: 340,
-      badges: ['Community Hero', 'Top Field Agent', '100+ Hours'],
-      humanityCardId: 'SWZ-CARD-8849',
+      name: 'Sheetal',
+      email: 'sheetal@sweezenfoundation.org',
+      phone: '+91-9045652546',
+      role: 'Director',
+      profilePhoto: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
+      skills: ['Strategic Planning', 'Healthcare', 'Field Outreach'],
+      interests: ['Healthcare', 'Environment'],
+      location: 'Haridwar, Uttarakhand',
+      availability: 'Full-Time',
+      impactPoints: 1500,
+      badges: ['Director', 'Founding Member'],
+      humanityCardId: 'SWZ-CARD-1001',
     );
     _isLoggedIn = false;
 
     // Load Projects
     loadProjects();
 
-    // Default Tasks
+    // Default Tasks (Matching Website Data)
     _assignedTasks = [
       TaskModel(
         id: 101,
-        title: 'Distribute Health Kits in Village Camp',
-        description: 'Provide hygiene kits, basic medicine packages, and nutritional supplements to families at Camp 4.',
-        location: 'Camp 4, Ranchi Outskirts',
-        requiredSkills: ['Field Work', 'First Aid'],
+        title: 'HealthCare Camp Patient Registration & Assistance',
+        description: 'Assist doctors with patient token distribution, vital recordings, and basic medicine kit dispatch at Haridwar Health Camp.',
+        location: '353 Avas Vikas Colony, Haridwar',
+        requiredSkills: ['Field Work', 'Patient Assistance', 'First Aid'],
         status: 'Pending',
-        remarks: 'Bring extra water bottles for volunteers.',
+        remarks: 'Coordinate with Camp Leader Sheetal on arrival.',
+        geoLat: 29.9600,
+        geoLng: 78.2000,
       ),
       TaskModel(
         id: 102,
-        title: 'Digital Learning Assessment Drive',
-        description: 'Evaluate student tablet usage and collect feedback from local teachers at Dharavi Smart Pod.',
-        location: 'Dharavi Center 2, Mumbai',
-        requiredSkills: ['Teaching', 'Data Entry'],
+        title: 'Haridwar Riverbank Environment Sanitation Drive',
+        description: 'Lead volunteer groups in plastic waste collection, segregation, and public eco-awareness near riverbank ghats.',
+        location: 'Riverbank Ghats, Haridwar',
+        requiredSkills: ['Environment', 'Community Work'],
         status: 'In Progress',
-        remarks: 'Forms to be filled offline if internet drops.',
-        photoUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80',
-      ),
-      TaskModel(
-        id: 103,
-        title: 'Riverbank Tree Sapling Geo-tagging',
-        description: 'Plant 200 saplings and capture exact GPS locations using the mobile app scanner.',
-        location: 'Uttarkashi Sector 3',
-        requiredSkills: ['Environment', 'GPS Tagging'],
-        status: 'Completed',
-        remarks: '200 saplings tagged successfully!',
+        remarks: 'Safety gloves and collection bags will be provided.',
         photoUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80',
+        geoLat: 29.9457,
+        geoLng: 78.1642,
       )
     ];
 
-    // Default Events
+    // Default Events (Matching Website Data)
     _events = [
       EventModel(
         id: 201,
-        title: 'Annual Sweezen Impact Conclave 2026',
-        description: 'Join philanthropic leaders, rural volunteers, and donors for an inspiring summit on UN SDG alignment and community empowerment.',
-        category: 'Conference',
-        location: 'National Convention Center, New Delhi',
-        registeredCount: 342,
-        bannerUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+        title: 'Community HealthCare Camp Haridwar',
+        description: 'Free medical checkup camp providing doctor consultations, free medicine distribution, and diagnostic screenings for local families.',
+        category: 'Healthcare',
+        location: '353 Avas Vikas Colony, Haridwar, Uttarakhand',
+        registeredCount: 211,
+        bannerUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
         status: 'Upcoming',
       ),
       EventModel(
         id: 202,
-        title: 'Mega Health & Eye Checkup Camp',
-        description: 'Free comprehensive health checkups, eye testing, and prescription spectacles for over 1,500 rural villagers.',
-        category: 'Healthcare',
-        location: 'Community Center, Thane Rural',
-        registeredCount: 210,
-        bannerUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
+        title: 'Swachh Haridwar Environment Drive',
+        description: 'Mass public cleanliness drive, plastic waste collection, and riverbank environmental sanitation campaign.',
+        category: 'Environment',
+        location: 'Ghats & Public Parks, Haridwar, Uttarakhand',
+        registeredCount: 100,
+        bannerUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
         status: 'Upcoming',
       )
     ];

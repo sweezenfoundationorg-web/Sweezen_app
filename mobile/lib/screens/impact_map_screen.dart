@@ -11,9 +11,15 @@ class ImpactMapScreen extends StatelessWidget {
     final state = Provider.of<AppStateProvider>(context);
 
     final locations = [
-      {'name': 'Ranchi & East Singhbhum', 'state': 'Jharkhand', 'program': 'Mobile Health Unit Clinics', 'lat': '23.3441° N', 'lng': '85.3096° E', 'beneficiaries': '14,200'},
-      {'name': 'Dharavi & Thane Rural', 'state': 'Maharashtra', 'program': 'Shiksha Setu Digital Pods', 'lat': '19.0402° N', 'lng': '72.8508° E', 'beneficiaries': '8,500'},
-      {'name': 'Uttarkashi & Haridwar', 'state': 'Uttarakhand', 'program': 'Green Canopy Tree Plantation', 'lat': '30.7268° N', 'lng': '78.4354° E', 'beneficiaries': '25,500'},
+      {'name': 'Haridwar HealthCare Camp', 'state': 'Uttarakhand', 'program': 'HealthCare Camp', 'lat': '29.9600° N', 'lng': '78.2000° E', 'beneficiaries': '211 Lives Touched'},
+      {'name': 'Haridwar Riverbanks', 'state': 'Uttarakhand', 'program': 'Environment Cleaning Camp', 'lat': '29.9457° N', 'lng': '78.1642° E', 'beneficiaries': '100+ Community Members'},
+    ];
+
+    final wallOfHonor = [
+      {'name': 'Fareed Khan', 'amount': '₹14,200', 'donations': '3 Donations'},
+      {'name': 'SHEETAL', 'amount': '₹100', 'donations': '1 Donation'},
+      {'name': 'Kapil', 'amount': '₹10', 'donations': '1 Donation'},
+      {'name': 'Dev', 'amount': '₹1', 'donations': '1 Donation'},
     ];
 
     return Scaffold(
@@ -25,7 +31,7 @@ class ImpactMapScreen extends StatelessWidget {
           children: [
             // Map Visual Representation Container
             Container(
-              height: 200,
+              height: 190,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: AppTheme.cardNavy,
@@ -41,10 +47,10 @@ class ImpactMapScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: const [
-                    Icon(Icons.map, color: AppTheme.amberGold, size: 48),
+                    Icon(Icons.map, color: AppTheme.amberGold, size: 44),
                     SizedBox(height: 8),
                     Text('GEO-TAGGED PROJECT IMPACT MAP', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1)),
-                    Text('3 Active States • 47 Camp Locations', style: TextStyle(color: AppTheme.lightGold, fontSize: 12)),
+                    Text('12+ Districts Covered • 2 Active Projects', style: TextStyle(color: AppTheme.lightGold, fontSize: 12)),
                   ],
                 ),
               ),
@@ -59,9 +65,46 @@ class ImpactMapScreen extends StatelessWidget {
               decoration: BoxDecoration(color: AppTheme.cardNavy, borderRadius: BorderRadius.circular(14)),
               child: Column(
                 children: [
-                  _buildUtilizationRow('Healthcare Programs', '84% Utilized', '₹850,000 / ₹1,120,000'),
-                  _buildUtilizationRow('Education Pods', '71% Utilized', '₹1,200,000 / ₹1,680,000'),
-                  _buildUtilizationRow('Environment Drives', '80% Utilized', '₹740,000 / ₹920,000'),
+                  _buildUtilizationRow('HealthCare Camp', 'Active Campaign', '₹14,311 Raised / ₹60,000 Target'),
+                  const Divider(color: Colors.white12),
+                  _buildUtilizationRow('Environment Cleaning Camp', 'Active Campaign', '₹0 Raised / Community Drive'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            const Text('WALL OF HONOR (CONTRIBUTORS):', style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1)),
+            const SizedBox(height: 10),
+
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: AppTheme.cardNavy, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppTheme.amberGold.withOpacity(0.3))),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text('TOTAL FUNDS RAISED:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text('₹14,311 (₹0.14 Lakhs)', style: TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.w900, fontSize: 15)),
+                    ],
+                  ),
+                  const Divider(color: Colors.white24, height: 20),
+                  ...wallOfHonor.map((d) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.favorite, color: AppTheme.amberGold, size: 14),
+                            const SizedBox(width: 8),
+                            Text(d['name']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                          ],
+                        ),
+                        Text('${d['amount']} (${d['donations']})', style: const TextStyle(color: AppTheme.lightGold, fontSize: 12)),
+                      ],
+                    ),
+                  )),
                 ],
               ),
             ),
@@ -81,7 +124,7 @@ class ImpactMapScreen extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.location_on, color: AppTheme.amberGold),
                   title: Text(loc['name']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                  subtitle: Text('${loc['program']} • ${loc['beneficiaries']} Beneficiaries', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  subtitle: Text('${loc['program']} • ${loc['beneficiaries']}', style: const TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                   trailing: Text(loc['lat']!, style: const TextStyle(color: AppTheme.lightGold, fontSize: 11)),
                 ),
               );
