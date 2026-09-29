@@ -342,6 +342,8 @@ class _DonateTabState extends State<DonateTab> {
                     ),
                   );
                 },
+              ),
+            ),
             const SizedBox(height: 28),
 
             // 1. Donation Type Toggle
