@@ -1,6 +1,6 @@
 # ========================================================
 # RENDER BLUEPRINT CONFIGURATION (render.yaml)
-# Sweezen Foundation Node.js Express API & PostgreSQL Database
+# Sweezen Foundation Node.js Express API & MongoDB Atlas
 # ========================================================
 
 services:
@@ -19,29 +19,24 @@ services:
       - key: PORT
         value: 10000
       - key: JWT_SECRET
-        generateValue: true
-      - key: DATABASE_URL
-        fromDatabase:
-          name: sweezen-postgres-db
-          property: connectionString
+        value: a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef12
+      - key: MONGO_URL
+        value: mongodb+srv://sweezenfoundationorg_db_user:tCUE2EtQZOp4FK7G@sweezen.hlvaf4g.mongodb.net/?appName=sweezen
+      - key: DB_NAME
+        value: sweezen
+      - key: PUBLIC_BASE_URL
+        value: https://sweezen-backend-deploy-main.onrender.com
+      - key: CLOUDINARY_API_KEY
+        value: "886513459576894"
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dbaqhwxka
+      - key: CLOUDINARY_UPLOAD_PRESET
+        value: sweezen
+      - key: RAZORPAY_KEY_ID
+        value: rzp_live_SX4zNEot5CQYTC
+      - key: RAZORPAY_KEY_SECRET
+        value: ux58nwSgrlLafgcNgupIvajz
       - key: SMTP_EMAIL
         sync: false
       - key: SMTP_PASS
         sync: false
-      - key: RAZORPAY_KEY_ID
-        sync: false
-      - key: RAZORPAY_KEY_SECRET
-        sync: false
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      - key: FIREBASE_CLIENT_EMAIL
-        sync: false
-      - key: FIREBASE_PRIVATE_KEY
-        sync: false
-
-databases:
-  - name: sweezen-postgres-db
-    databaseName: sweezen_db
-    user: sweezen_admin
-    plan: free
-    region: singapore

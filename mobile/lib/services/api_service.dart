@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/models.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://sweezen-backend-api.onrender.com/api';
+  static const String baseUrl = 'http://10.0.2.2:5000/api'; // Use http://localhost:5000/api or http://10.0.2.2:5000/api for local backend
 
   // Request OTP via Gmail SMTP
   static Future<Map<String, dynamic>> requestOtp(String recipient) async {

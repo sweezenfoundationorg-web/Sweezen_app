@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken');
-const { memoryDb } = require('../config/db');
+const { getCollection, memoryDb } = require('../config/db');
 const { sendOtpEmail } = require('../config/smtp');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sweezen_jwt_secret_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'a1b2c3d4e5f678901234567890abcdef1234567890abcdef1234567890abcdef12';
 
-// Send OTP
+// 1. Request OTP (Sends Email OTP via Gmail SMTP)
 exports.requestOtp = async (req, res) => {
   try {
     const { target, email, phone } = req.body;
@@ -18,7 +18,17 @@ exports.requestOtp = async (req, res) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
-    // Store in memoryDb
+    // Store in MongoDB email_otps collection
+    const otpsCol = getCollection('email_otps');
+    if (otpsCol) {
+      await otpsCol.updateOne(
+        { email: recipient },
+        { $set: { email: recipient, otp: otpCode, expires_at: expiresAt, created_at: new Date() } },
+        { upsert: true }
+      );
+    }
+
+    // Also store in memoryDb
     const existingIndex = memoryDb.otps.findIndex(o => o.target === recipient);
     if (existingIndex >= 0) {
       memoryDb.otps[existingIndex] = { target: recipient, otp_code: otpCode, expires_at: expiresAt, verified: false };
@@ -26,17 +36,17 @@ exports.requestOtp = async (req, res) => {
       memoryDb.otps.push({ target: recipient, otp_code: otpCode, expires_at: expiresAt, verified: false });
     }
 
-    // Send email via Nodemailer Gmail SMTP if recipient looks like an email
+    // Dispatch email via Nodemailer Gmail SMTP if recipient is an email address
     if (recipient.includes('@')) {
       await sendOtpEmail(recipient, otpCode);
     } else {
-      console.log(`[SMS OTP DEV] Sending SMS OTP to ${recipient}: ${otpCode}`);
+      console.log(`[SMS OTP DEV] Dispatching SMS OTP to ${recipient}: ${otpCode}`);
     }
 
     return res.status(200).json({
       success: true,
       message: `OTP sent successfully to ${recipient}`,
-      otp: process.env.NODE_ENV === 'production' ? undefined : otpCode // Returned for dev ease
+      otp: process.env.NODE_ENV === 'production' ? undefined : otpCode
     });
   } catch (err) {
     console.error('Request OTP error:', err);
@@ -44,30 +54,51 @@ exports.requestOtp = async (req, res) => {
   }
 };
 
-// Verify OTP
+// 2. Verify OTP
 exports.verifyOtp = async (req, res) => {
   try {
     const { target, email, phone, otp } = req.body;
     const recipient = target || email || phone;
 
     if (!recipient || !otp) {
-      return res.status(400).json({ success: false, message: 'Target and OTP code are required' });
+      return res.status(400).json({ success: false, message: 'Target email/phone and OTP code are required' });
     }
 
-    const otpRecord = memoryDb.otps.find(o => o.target === recipient && o.otp_code === otp.trim());
+    const cleanOtp = otp.toString().trim();
+    let isValidOtp = false;
 
-    // Allow static master OTP '123456' for test convenience
-    if (!otpRecord && otp.trim() !== '123456') {
+    // Check MongoDB
+    const otpsCol = getCollection('email_otps');
+    if (otpsCol) {
+      const dbRecord = await otpsCol.findOne({ email: recipient, otp: cleanOtp });
+      if (dbRecord) isValidOtp = true;
+    }
+
+    // Check memoryDb
+    const otpRecord = memoryDb.otps.find(o => o.target === recipient && o.otp_code === cleanOtp);
+    if (otpRecord) isValidOtp = true;
+
+    // Allow master test OTP '123456' for ease of testing
+    if (cleanOtp === '123456') isValidOtp = true;
+
+    if (!isValidOtp) {
       return res.status(400).json({ success: false, message: 'Invalid or expired OTP code' });
     }
 
-    if (otpRecord) {
-      otpRecord.verified = true;
+    if (otpRecord) otpRecord.verified = true;
+
+    // Retrieve or create user record in MongoDB / memoryDb
+    const usersCol = getCollection('users');
+    let user = null;
+
+    if (usersCol) {
+      user = await usersCol.findOne({ $or: [{ email: recipient }, { phone: recipient }] });
     }
 
-    // Check if user already exists
-    let user = memoryDb.users.find(u => u.email === recipient || u.phone === recipient);
-    
+    if (!user) {
+      user = memoryDb.users.find(u => u.email === recipient || u.phone === recipient);
+    }
+
     if (!user) {
       let derivedName = 'Sweezen Member';
       if (recipient.includes('@')) {
@@ -80,14 +111,15 @@ exports.verifyOtp = async (req, res) => {
         }
       }
 
-      user = {
-        id: memoryDb.users.length + 1,
+      const newUserObj = {
+        id: `SWZ-USER-${Date.now()}`,
         name: derivedName,
-        email: recipient.includes('@') ? recipient : `${recipient}@sweezen.org`,
+        email: recipient.includes('@') ? recipient : `${recipient}@sweezenfoundation.org`,
         phone: recipient.includes('@') ? '+91 9876543210' : recipient,
         role: 'Volunteer',
+        status: 'active',
         profile_photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-        skills: ['Field Coordination', 'First Aid'],
+        skills: ['Field Coordination', 'First Aid', 'Teaching'],
         interests: ['Healthcare', 'Education'],
         location: 'Mumbai, Maharashtra',
         availability: 'Weekends',
@@ -96,17 +128,23 @@ exports.verifyOtp = async (req, res) => {
         humanity_card_id: `SWZ-CARD-${Math.floor(1000 + Math.random() * 9000)}`,
         created_at: new Date()
       };
-      memoryDb.users.push(user);
+
+      if (usersCol) {
+        await usersCol.insertOne(newUserObj);
+      }
+      memoryDb.users.push(newUserObj);
+      user = newUserObj;
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const userId = user.id || user._id;
+    const token = jwt.sign({ id: userId, role: user.role || 'Volunteer', email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     return res.status(200).json({
       success: true,
       message: 'OTP verified successfully',
       isRegistered: true,
-      token: token,
-      user: user
+      token,
+      user
     });
   } catch (err) {
     console.error('Verify OTP error:', err);
@@ -114,38 +152,36 @@ exports.verifyOtp = async (req, res) => {
   }
 };
 
-// Multi-step Registration
+// 3. Multi-step Registration
 exports.registerMultiStep = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      phone,
-      role, // Volunteer, Donor, Researcher, Beneficiary, Staff, Partner
-      skills,
-      interests,
-      location,
-      availability,
-      experience,
-      documents
-    } = req.body;
+    const { name, email, phone, role, skills, interests, location, availability, experience, documents } = req.body;
 
     if (!name || (!email && !phone)) {
       return res.status(400).json({ success: false, message: 'Name and Email/Phone are required' });
     }
 
-    // Check existing
-    const existing = memoryDb.users.find(u => (email && u.email === email) || (phone && u.phone === phone));
+    const usersCol = getCollection('users');
+    let existing = null;
+
+    if (usersCol) {
+      existing = await usersCol.findOne({ $or: [{ email: email || '' }, { phone: phone || '' }] });
+    }
+    if (!existing) {
+      existing = memoryDb.users.find(u => (email && u.email === email) || (phone && u.phone === phone));
+    }
+
     if (existing) {
       return res.status(400).json({ success: false, message: 'An account with this Email or Phone already exists' });
     }
 
     const newUser = {
-      id: memoryDb.users.length + 1,
+      id: `SWZ-USER-${Date.now()}`,
       name,
-      email: email || `${phone}@sweezen.org`,
+      email: email || `${phone}@sweezenfoundation.org`,
       phone: phone || '',
       role: role || 'Volunteer',
+      status: 'active',
       profile_photo: req.body.profile_photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
       skills: Array.isArray(skills) ? skills : (skills ? skills.split(',') : []),
       interests: Array.isArray(interests) ? interests : (interests ? interests.split(',') : []),
@@ -153,12 +189,15 @@ exports.registerMultiStep = async (req, res) => {
       availability: availability || 'Flexible',
       experience: experience || '',
       documents: documents || [{ name: 'ID_Proof.pdf', status: 'Pending Review' }],
-      impact_points: role === 'Volunteer' ? 50 : 100, // Welcome points
+      impact_points: role === 'Volunteer' ? 50 : 100,
       badges: role === 'Volunteer' ? ['Registered Volunteer'] : ['Registered Donor'],
       humanity_card_id: `SWZ-CARD-${Math.floor(1000 + Math.random() * 9000)}`,
       created_at: new Date()
     };
 
+    if (usersCol) {
+      await usersCol.insertOne(newUser);
+    }
     memoryDb.users.push(newUser);
 
     const token = jwt.sign({ id: newUser.id, role: newUser.role, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
@@ -175,18 +214,32 @@ exports.registerMultiStep = async (req, res) => {
   }
 };
 
-// Login
+// 4. Login
 exports.login = async (req, res) => {
   try {
     const { email, phone } = req.body;
     const recipient = email || phone;
-    const user = memoryDb.users.find(u => u.email === recipient || u.phone === recipient);
+
+    if (!recipient) {
+      return res.status(400).json({ success: false, message: 'Email or Phone is required for login' });
+    }
+
+    const usersCol = getCollection('users');
+    let user = null;
+
+    if (usersCol) {
+      user = await usersCol.findOne({ $or: [{ email: recipient }, { phone: recipient }] });
+    }
+    if (!user) {
+      user = memoryDb.users.find(u => u.email === recipient || u.phone === recipient);
+    }
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User account not found. Please register.' });
     }
 
-    const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const userId = user.id || user._id;
+    const token = jwt.sign({ id: userId, role: user.role || 'Volunteer', email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     return res.status(200).json({
       success: true,
@@ -199,11 +252,19 @@ exports.login = async (req, res) => {
   }
 };
 
-// Get Profile
+// 5. Get Profile
 exports.getProfile = async (req, res) => {
   try {
-    const userId = req.user ? req.user.id : parseInt(req.query.id || '1');
-    const user = memoryDb.users.find(u => u.id === userId);
+    const userId = req.user ? req.user.id : (req.query.id || '1');
+    const usersCol = getCollection('users');
+    let user = null;
+
+    if (usersCol) {
+      user = await usersCol.findOne({ $or: [{ id: userId }, { email: req.user?.email }] });
+    }
+    if (!user) {
+      user = memoryDb.users.find(u => u.id == userId || u.email === req.user?.email);
+    }
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'Profile not found' });
@@ -215,18 +276,22 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Update Profile
+// 6. Update Profile
 exports.updateProfile = async (req, res) => {
   try {
-    const userId = req.user ? req.user.id : parseInt(req.body.id || '1');
-    const user = memoryDb.users.find(u => u.id === userId);
+    const userId = req.user ? req.user.id : (req.body.id || '1');
+    const usersCol = getCollection('users');
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+    if (usersCol) {
+      await usersCol.updateOne({ id: userId }, { $set: req.body });
     }
 
-    Object.assign(user, req.body);
-    return res.status(200).json({ success: true, message: 'Profile updated successfully', user });
+    const user = memoryDb.users.find(u => u.id == userId);
+    if (user) {
+      Object.assign(user, req.body);
+    }
+
+    return res.status(200).json({ success: true, message: 'Profile updated successfully' });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Profile update failed' });
   }

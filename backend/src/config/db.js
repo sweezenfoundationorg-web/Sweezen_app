@@ -1,22 +1,36 @@
-const { Pool } = require('pg');
+const { MongoClient } = require('mongodb');
 require('dotenv').config();
 
-// Postgres Pool connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URI,
-  user: process.env.PGUSER || 'postgres',
-  host: process.env.PGHOST || 'localhost',
-  database: process.env.PGDATABASE || 'sweezen_db',
-  password: process.env.PGPASSWORD || 'postgres',
-  port: parseInt(process.env.PGPORT || '5432'),
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+const mongoUrl = process.env.MONGO_URL || "mongodb+srv://sweezenfoundationorg_db_user:tCUE2EtQZOp4FK7G@sweezen.hlvaf4g.mongodb.net/?appName=sweezen";
+const dbName = process.env.DB_NAME || "sweezen";
 
-pool.on('error', (err) => {
-  console.error('Unexpected database error:', err);
-});
+let client = null;
+let dbInstance = null;
 
-// Memory Database Store fallback for zero-dependency execution
+// Connect to MongoDB Database
+const connectDb = async () => {
+  if (dbInstance) return dbInstance;
+  try {
+    client = new MongoClient(mongoUrl);
+    await client.connect();
+    dbInstance = client.db(dbName);
+    console.log(`[MongoDB] Successfully connected to database: "${dbName}"`);
+    return dbInstance;
+  } catch (err) {
+    console.error(`[MongoDB Connection Error]`, err.message);
+    console.warn(`[Fallback] Operating with memory store layer.`);
+    return null;
+  }
+};
+
+const getDb = () => dbInstance;
+
+const getCollection = (colName) => {
+  if (!dbInstance) return null;
+  return dbInstance.collection(colName);
+};
+
+// Memory Database Store fallback for zero-downtime execution
 class MemoryStore {
   constructor() {
     this.users = [];
@@ -37,14 +51,8 @@ class MemoryStore {
 const memoryDb = new MemoryStore();
 
 module.exports = {
-  pool,
-  memoryDb,
-  query: async (text, params) => {
-    try {
-      return await pool.query(text, params);
-    } catch (err) {
-      console.warn('Postgres connection not available. Operating with fallback storage layer.', err.message);
-      throw err;
-    }
-  }
+  connectDb,
+  getDb,
+  getCollection,
+  memoryDb
 };

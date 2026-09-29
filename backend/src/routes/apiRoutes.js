@@ -11,12 +11,19 @@ const communicationController = require('../controllers/communicationController'
 const chatbotController = require('../controllers/chatbotController');
 const adminController = require('../controllers/adminController');
 
-// 1. Auth Routes
+// 1. Auth Routes (Supports both App & Web Auth API conventions)
 router.post('/auth/request-otp', authController.requestOtp);
+router.post('/auth/email-otp/send', authController.requestOtp);
+
 router.post('/auth/verify-otp', authController.verifyOtp);
+router.post('/auth/email-otp/verify', authController.verifyOtp);
+router.post('/auth/firebase/email-otp-verify', authController.verifyOtp);
+
 router.post('/auth/register', authController.registerMultiStep);
 router.post('/auth/login', authController.login);
+
 router.get('/auth/profile', authController.getProfile);
+router.get('/auth/me', authController.getProfile);
 router.put('/auth/profile', authController.updateProfile);
 
 // 2. Project Routes
@@ -24,10 +31,13 @@ router.get('/projects', projectController.getProjects);
 router.get('/projects/:id', projectController.getProjectById);
 router.post('/projects', projectController.createProject);
 
-// 3. Donation Routes
+// 3. Donation Routes & Razorpay Payment Gateway
 router.post('/donations/create-order', donationController.createDonationOrder);
 router.post('/donations/verify-payment', donationController.verifyDonationPayment);
+router.post('/donations/verify', donationController.verifyDonationPayment);
 router.get('/donations/history', donationController.getDonationHistory);
+router.get('/donations', donationController.getDonationHistory);
+router.get('/donations/my', donationController.getDonationHistory);
 router.get('/donations/receipt/:txnId', donationController.get80GReceipt);
 
 // 4. Volunteer & Task Routes
@@ -35,8 +45,9 @@ router.get('/volunteer/tasks', volunteerController.getAssignedTasks);
 router.post('/volunteer/submit-report', volunteerController.submitFieldReport);
 router.post('/volunteer/sync-offline', volunteerController.syncOfflineReports);
 
-// 5. Events & Certificates Routes
+// 5. Events & Gallery Routes
 router.get('/events', eventController.getEvents);
+router.get('/gallery/events', eventController.getEvents);
 router.post('/events/register', eventController.registerForEvent);
 router.post('/events/cancel', eventController.cancelRegistration);
 router.get('/events/certificates', eventController.getUserCertificates);
@@ -56,6 +67,7 @@ router.post('/chatbot/ask', chatbotController.askSweezen);
 
 // 9. Admin Control & Management Routes
 router.get('/admin/stats', adminController.getAdminDashboardStats);
+router.get('/stats', adminController.getAdminDashboardStats);
 
 // Projects / Campaigns Management
 router.post('/admin/projects', adminController.createProject);
