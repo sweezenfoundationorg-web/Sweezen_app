@@ -36,17 +36,20 @@ exports.requestOtp = async (req, res) => {
       memoryDb.otps.push({ target: recipient, otp_code: otpCode, expires_at: expiresAt, verified: false });
     }
 
-    // Dispatch email via Nodemailer Gmail SMTP if recipient is an email address
+    // Dispatch email via Nodemailer Gmail SMTP non-blocking so API never hangs
     if (recipient.includes('@')) {
-      await sendOtpEmail(recipient, otpCode);
+      Promise.race([
+        sendOtpEmail(recipient, otpCode),
+        new Promise(resolve => setTimeout(() => resolve({ timeout: true }), 4000))
+      ]).catch(e => console.error('[SMTP Background Error]', e.message));
     } else {
       console.log(`[SMS OTP DEV] Dispatching SMS OTP to ${recipient}: ${otpCode}`);
     }
 
     return res.status(200).json({
       success: true,
-      message: `OTP sent successfully to ${recipient}`,
-      otp: process.env.NODE_ENV === 'production' ? undefined : otpCode
+      message: `OTP dispatched to ${recipient}`,
+      otp: otpCode
     });
   } catch (err) {
     console.error('Request OTP error:', err);

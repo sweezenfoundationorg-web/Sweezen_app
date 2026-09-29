@@ -31,7 +31,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? 1,
+      id: json['id'] is int ? json['id'] : (int.tryParse(json['id'].toString()) ?? 1),
       name: json['name'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
@@ -49,7 +49,7 @@ class UserModel {
 }
 
 class ProjectModel {
-  final int id;
+  final dynamic id;
   final String name;
   final String category;
   final String description;
@@ -84,19 +84,27 @@ class ProjectModel {
   }
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
+    final rawCategory = (json['category'] ?? 'Healthcare').toString();
+    String formattedCategory = rawCategory;
+    if (rawCategory.isNotEmpty) {
+      formattedCategory = rawCategory[0].toUpperCase() + rawCategory.substring(1).toLowerCase();
+    }
+
     return ProjectModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? '',
-      category: json['category'] ?? 'Healthcare',
+      id: json['id'] ?? json['_id'] ?? 1,
+      name: json['title'] ?? json['name'] ?? 'Sweezen Foundation Camp',
+      category: formattedCategory,
       description: json['description'] ?? '',
-      objectives: List<String>.from(json['objectives'] ?? []),
-      location: json['location'] ?? '',
-      beneficiaryCount: json['beneficiary_count'] ?? 0,
-      fundingGoal: (json['funding_goal'] ?? 0).toDouble(),
-      fundingRaised: (json['funding_raised'] ?? 0).toDouble(),
-      fundingUtilized: (json['funding_utilized'] ?? 0).toDouble(),
-      status: json['status'] ?? 'Active',
-      imageUrl: json['image_url'] ?? '',
+      objectives: json['objectives'] != null ? List<String>.from(json['objectives']) : [],
+      location: json['location'] ?? 'Haridwar, Uttarakhand',
+      beneficiaryCount: json['beneficiary_count'] ?? json['beneficiaryCount'] ?? 0,
+      fundingGoal: (json['budget'] ?? json['funding_goal'] ?? json['fundingGoal'] ?? 0).toDouble(),
+      fundingRaised: (json['raised'] ?? json['funding_raised'] ?? json['fundingRaised'] ?? 0).toDouble(),
+      fundingUtilized: (json['funding_utilized'] ?? json['fundingUtilized'] ?? 0).toDouble(),
+      status: (json['status'] ?? 'Active').toString().toUpperCase() == 'ACTIVE' ? 'Active' : 'Completed',
+      imageUrl: (json['image_url'] != null && json['image_url'].toString().isNotEmpty)
+          ? json['image_url'].toString()
+          : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
     );
   }
 }
@@ -107,7 +115,7 @@ class TaskModel {
   final String description;
   final String location;
   final List<String> requiredSkills;
-  final String status; // Pending, In Progress, Completed
+  final String status;
   final String remarks;
   final String? photoUrl;
   final double? geoLat;
@@ -128,7 +136,7 @@ class TaskModel {
 
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
-      id: json['id'] ?? 0,
+      id: json['id'] is int ? json['id'] : (int.tryParse(json['id'].toString()) ?? 0),
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       location: json['location'] ?? '',
@@ -143,7 +151,7 @@ class TaskModel {
 }
 
 class EventModel {
-  final int id;
+  final dynamic id;
   final String title;
   final String description;
   final String category;
@@ -165,13 +173,13 @@ class EventModel {
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
-      id: json['id'] ?? 0,
+      id: json['id'] ?? json['_id'] ?? 0,
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       category: json['category'] ?? 'Outreach',
       location: json['location'] ?? '',
       registeredCount: json['registered_count'] ?? 0,
-      bannerUrl: json['banner_url'] ?? '',
+      bannerUrl: json['banner_url'] ?? json['image_url'] ?? '',
       status: json['status'] ?? 'Upcoming',
     );
   }
