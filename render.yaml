@@ -1,6 +1,6 @@
 # ========================================================
 # RENDER BLUEPRINT CONFIGURATION (render.yaml)
-# Sweezen Foundation Node.js Express API & MongoDB Atlas
+# Sweezen Foundation Node.js Express API with Mailjet Email & MongoDB
 # ========================================================
 
 services:
@@ -36,7 +36,17 @@ services:
         value: rzp_live_SX4zNEot5CQYTC
       - key: RAZORPAY_KEY_SECRET
         value: ux58nwSgrlLafgcNgupIvajz
+      - key: MAILJET_API_KEY
+        value: 0d1ac7d05e42ef61d31883e193590328
+      - key: MAILJET_SECRET_KEY
+        value: 5beaecdb41ac3c208891c7461a76825c
+      - key: MAILJET_SENDER_EMAIL
+        value: sweezenfoundationorg@gmail.com
+      - key: SMTP_HOST
+        value: in-v3.mailjet.com
+      - key: SMTP_PORT
+        value: "587"
       - key: SMTP_EMAIL
-        sync: false
+        value: 0d1ac7d05e42ef61d31883e193590328
       - key: SMTP_PASS
-        sync: false
+        value: 5beaecdb41ac3c208891c7461a76825c

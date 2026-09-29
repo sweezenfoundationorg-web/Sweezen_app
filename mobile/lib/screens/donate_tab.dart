@@ -16,13 +16,13 @@ class DonateTab extends StatefulWidget {
 
 class _DonateTabState extends State<DonateTab> {
   final TextEditingController _amountController = TextEditingController(text: '1000');
-  final TextEditingController _nameController = TextEditingController(text: 'Sheetal');
-  final TextEditingController _emailController = TextEditingController(text: 'sheetal@sweezenfoundation.org');
+  final TextEditingController _nameController = TextEditingController(text: 'Sweezen Supporter');
+  final TextEditingController _emailController = TextEditingController(text: 'supporter@sweezenfoundation.org');
   final TextEditingController _panController = TextEditingController(text: 'ABCDE1234F');
   final ScrollController _scrollController = ScrollController();
 
   String _donationType = 'One-Time'; // One-Time, Recurring
-  int? _selectedProjectId; // null = General Fund
+  dynamic _selectedProjectId; // null = General Fund (supports String UUID & int)
   String _paymentMethod = 'UPI'; // UPI, Card, NetBanking, Razorpay
   bool _isAnonymous = false;
   bool _is80GRequested = true;
@@ -31,11 +31,13 @@ class _DonateTabState extends State<DonateTab> {
   final List<int> _presetAmounts = [500, 1000, 2500, 5000, 10000];
 
   void _scrollToForm() {
-    _scrollController.animateTo(
-      550,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        450,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _selectProgram(ProjectModel project) {
@@ -63,43 +65,49 @@ class _DonateTabState extends State<DonateTab> {
 
     setState(() => _isProcessing = true);
 
-    // 1. Create Razorpay order via API
-    final orderRes = await ApiService.createDonationOrder(
-      amount,
-      projectId: _selectedProjectId,
-      donorName: _nameController.text.trim(),
-      donorEmail: _emailController.text.trim(),
-      isAnonymous: _isAnonymous,
-      is80g: _is80GRequested,
-      panNumber: _panController.text.trim(),
-    );
+    try {
+      // 1. Create Razorpay order via API
+      final orderRes = await ApiService.createDonationOrder(
+        amount,
+        donorName: _nameController.text.trim(),
+        donorEmail: _emailController.text.trim(),
+        isAnonymous: _isAnonymous,
+        is80g: _is80GRequested,
+        panNumber: _panController.text.trim(),
+      );
 
-    // 2. Verify payment simulation
-    final verifyPayload = {
-      'razorpay_order_id': orderRes['order']?['id'] ?? 'order_sim_123',
-      'razorpay_payment_id': 'pay_sim_${DateTime.now().millisecondsSinceEpoch}',
-      'razorpay_signature': 'simulated_signature',
-      'donation_details': orderRes['donation_details']
-    };
+      // 2. Verify payment simulation
+      final verifyPayload = {
+        'razorpay_order_id': orderRes['order']?['id'] ?? 'order_sim_123',
+        'razorpay_payment_id': 'pay_sim_${DateTime.now().millisecondsSinceEpoch}',
+        'razorpay_signature': 'simulated_signature',
+        'donation_details': orderRes['donation_details']
+      };
 
-    final result = await ApiService.verifyDonationPayment(verifyPayload);
+      final result = await ApiService.verifyDonationPayment(verifyPayload);
 
-    setState(() => _isProcessing = false);
+      setState(() => _isProcessing = false);
 
-    if (result['success'] == true) {
-      // Show Instant 80G Receipt Modal!
-      showDialog(
-        context: context,
-        builder: (_) => ReceiptDialog(
-          donationDetails: {
-            'receiptId': orderRes['donation_details']?['receiptId'] ?? 'SWZ-RCPT-8891',
-            'txnId': result['transaction']?['transaction_id'] ?? 'TXN_SWZ_98231',
-            'amount': amount,
-            'donor_name': _isAnonymous ? 'Anonymous Donor' : _nameController.text,
-            'pan_number': _panController.text,
-            'project_name': _selectedProjectId != null ? 'Selected Foundation Program' : 'General Foundation Fund',
-          },
-        ),
+      if (result['success'] == true) {
+        // Show Instant 80G Receipt Modal
+        showDialog(
+          context: context,
+          builder: (_) => ReceiptDialog(
+            donationDetails: {
+              'receiptId': orderRes['donation_details']?['receiptId'] ?? 'SWZ-RCPT-8891',
+              'txnId': result['transaction']?['transaction_id'] ?? 'TXN_SWZ_98231',
+              'amount': amount,
+              'donor_name': _isAnonymous ? 'Anonymous Donor' : _nameController.text,
+              'pan_number': _panController.text,
+              'project_name': _selectedProjectId != null ? 'Selected Foundation Program' : 'General Foundation Fund',
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isProcessing = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Donation Error: $e'), backgroundColor: AppTheme.errorRed),
       );
     }
   }
@@ -121,10 +129,10 @@ class _DonateTabState extends State<DonateTab> {
               decoration: BoxDecoration(
                 color: AppTheme.cardNavy,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.4)),
+                border: Border.all(color: AppTheme.goldAccent.withOpacity(0.4)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withOpacity(0.3),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   )
@@ -137,7 +145,7 @@ class _DonateTabState extends State<DonateTab> {
                     decoration: BoxDecoration(
                       color: AppTheme.primaryNavy,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppTheme.amberGold.withValues(alpha: 0.3)),
+                      border: Border.all(color: AppTheme.amberGold.withOpacity(0.3)),
                     ),
                     child: const Icon(Icons.volunteer_activism, color: AppTheme.amberGold, size: 32),
                   ),
@@ -172,7 +180,7 @@ class _DonateTabState extends State<DonateTab> {
             ),
             const SizedBox(height: 24),
 
-            // FEATURED PROGRAMS SECTION WITH IMAGES AND "DONATE TO THIS PROGRAM" BUTTON
+            // FEATURED PROGRAMS SECTION
             const Text(
               'DONATE TO THIS PROGRAM:',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
@@ -210,12 +218,12 @@ class _DonateTabState extends State<DonateTab> {
                       color: AppTheme.cardNavy,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: isSelected ? AppTheme.amberGold : AppTheme.goldAccent.withValues(alpha: 0.3),
+                        color: isSelected ? AppTheme.amberGold : AppTheme.goldAccent.withOpacity(0.3),
                         width: isSelected ? 2.5 : 1.0,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
+                          color: Colors.black.withOpacity(0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         )
@@ -224,7 +232,7 @@ class _DonateTabState extends State<DonateTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Campaign Image Header with Category Badge & Asset Fallback
+                        // Campaign Image Header with Category Badge
                         Stack(
                           children: [
                             ClipRRect(
@@ -394,7 +402,7 @@ class _DonateTabState extends State<DonateTab> {
                     margin: const EdgeInsets.only(right: 8),
                     child: ActionChip(
                       backgroundColor: isSelected ? AppTheme.amberGold : AppTheme.cardNavy,
-                      side: BorderSide(color: AppTheme.goldAccent.withValues(alpha: 0.4)),
+                      side: BorderSide(color: AppTheme.goldAccent.withOpacity(0.4)),
                       label: Text('₹$amt', style: TextStyle(color: isSelected ? Colors.black : Colors.white, fontWeight: FontWeight.bold)),
                       onPressed: () {
                         setState(() => _amountController.text = amt.toString());
@@ -417,8 +425,8 @@ class _DonateTabState extends State<DonateTab> {
             ),
             const SizedBox(height: 20),
 
-            // 3. Project Allocation Dropdown
-            DropdownButtonFormField<int?>(
+            // 3. Project Allocation Dropdown (Type-safe for String/int IDs)
+            DropdownButtonFormField<dynamic>(
               value: _selectedProjectId,
               dropdownColor: AppTheme.cardNavy,
               style: const TextStyle(color: Colors.white, fontSize: 13),
@@ -427,8 +435,8 @@ class _DonateTabState extends State<DonateTab> {
                 prefixIcon: Icon(Icons.account_tree, color: AppTheme.goldAccent),
               ),
               items: [
-                const DropdownMenuItem(value: null, child: Text('General Foundation Fund (Where most needed)')),
-                ...state.projects.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name))),
+                const DropdownMenuItem<dynamic>(value: null, child: Text('General Foundation Fund (Where most needed)')),
+                ...state.projects.map((p) => DropdownMenuItem<dynamic>(value: p.id, child: Text(p.name))),
               ],
               onChanged: (val) => setState(() => _selectedProjectId = val),
             ),
@@ -455,7 +463,7 @@ class _DonateTabState extends State<DonateTab> {
               decoration: BoxDecoration(
                 color: AppTheme.cardNavy,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.3)),
+                border: Border.all(color: AppTheme.goldAccent.withOpacity(0.3)),
               ),
               child: Column(
                 children: [

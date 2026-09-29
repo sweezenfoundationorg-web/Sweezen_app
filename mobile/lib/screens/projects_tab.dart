@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/custom_gold_button.dart';
 import '../widgets/project_card.dart';
 
 class ProjectsTab extends StatefulWidget {
@@ -124,9 +125,13 @@ class _ProjectsTabState extends State<ProjectsTab> {
       backgroundColor: AppTheme.cardNavy,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) {
+        final double budgetLakhs = project.fundingGoal / 100000.0;
+        final double raisedLakhs = project.fundingRaised / 100000.0;
+        final int toGoPct = project.fundingGoal > 0 ? (100 - (project.progressPercentage * 100)).toInt() : 100;
+
         return Container(
-          height: MediaQuery.of(context).size.height * 0.82,
-          padding: const EdgeInsets.all(20),
+          height: MediaQuery.of(context).size.height * 0.88,
+          padding: const EdgeInsets.all(18),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,54 +145,157 @@ class _ProjectsTabState extends State<ProjectsTab> {
                 ),
                 const SizedBox(height: 16),
 
-                Text(project.name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
+                // Program Title & Category
                 Row(
                   children: [
-                    const Icon(Icons.location_on, color: AppTheme.amberGold, size: 16),
-                    const SizedBox(width: 4),
-                    Text(project.location, style: const TextStyle(color: AppTheme.lightGold, fontSize: 13)),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(color: AppTheme.amberGold, borderRadius: BorderRadius.circular(12)),
+                      child: Text(project.category.toUpperCase(), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 10)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        project.name,
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
 
-                const Text('PROGRAM OBJECTIVES:', style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12)),
-                const SizedBox(height: 8),
-                ...project.objectives.map((obj) => Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.check_circle_outline, color: AppTheme.amberGold, size: 16),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(obj, style: const TextStyle(color: Colors.white70, fontSize: 13))),
-                        ],
+                // 3 Detail Cards (Problem, Solution, Impact)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Problem Box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF0F3),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFFFB3C1)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('THE PROBLEM', style: TextStyle(color: Color(0xFFC9184A), fontWeight: FontWeight.bold, fontSize: 10)),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Limited access to ${project.category.toLowerCase()} services in rural communities.',
+                              style: const TextStyle(color: Color(0xFF590D22), fontSize: 11, height: 1.2),
+                            ),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Solution Box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFFBEB),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFFDE68A)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('OUR SOLUTION', style: TextStyle(color: Color(0xFFB45309), fontWeight: FontWeight.bold, fontSize: 10)),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${project.description} We implement evidence-based interventions.',
+                              style: const TextStyle(color: Color(0xFF78350F), fontSize: 11, height: 1.2),
+                              maxLines: 4,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Impact Box
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFECFDF5),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFA7F3D0)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('MEASURABLE IMPACT', style: TextStyle(color: Color(0xFF047857), fontWeight: FontWeight.bold, fontSize: 10)),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${project.beneficiaryCount} beneficiaries empowered with real-time tracking.',
+                              style: const TextStyle(color: Color(0xFF064E3B), fontSize: 11, height: 1.2),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 20),
 
-                const Text('FINANCIAL UTILIZATION & RAISED:', style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12)),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: AppTheme.primaryNavy, borderRadius: BorderRadius.circular(12)),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Funding Raised:', style: TextStyle(color: AppTheme.textMuted)),
-                          Text('₹${project.fundingRaised}', style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold)),
-                        ],
+                // Description
+                Text(project.description, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4)),
+                const SizedBox(height: 18),
+
+                // 4 Metric Stats Grid
+                Row(
+                  children: [
+                    _buildMetricStat('₹${budgetLakhs.toStringAsFixed(1)}L', 'Budget', AppTheme.goldAccent),
+                    const SizedBox(width: 8),
+                    _buildMetricStat('₹${raisedLakhs.toStringAsFixed(1)}L', 'Raised', const Color(0xFFFF4D6D)),
+                    const SizedBox(width: 8),
+                    _buildMetricStat('$toGoPct%', 'To Go', AppTheme.successGreen),
+                    const SizedBox(width: 8),
+                    _buildMetricStat('${project.beneficiaryCount}', 'Beneficiaries', Colors.white),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Funding Progress
+                const Text('FUNDING PROGRESS', style: TextStyle(color: AppTheme.textMuted, fontWeight: FontWeight.bold, fontSize: 11)),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: LinearProgressIndicator(
+                          value: project.progressPercentage,
+                          backgroundColor: Colors.white10,
+                          valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.amberGold),
+                          minHeight: 12,
+                        ),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Funding Utilized:', style: TextStyle(color: AppTheme.textMuted)),
-                          Text('₹${project.fundingUtilized}', style: const TextStyle(color: AppTheme.successGreen, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ],
+                    ),
+                    const SizedBox(width: 12),
+                    Text('${(project.progressPercentage * 100).toInt()}%', style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 14)),
+                  ],
+                ),
+                const SizedBox(height: 24),
+
+                // Donate Button
+                SizedBox(
+                  width: double.infinity,
+                  child: CustomGoldButton(
+                    text: 'DONATE TO THIS PROJECT',
+                    icon: Icons.favorite,
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      widget.onNavigateTab(2);
+                    },
                   ),
                 ),
               ],
@@ -195,6 +303,26 @@ class _ProjectsTabState extends State<ProjectsTab> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildMetricStat(String value, String label, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryNavy,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Column(
+          children: [
+            Text(value, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 10)),
+          ],
+        ),
+      ),
     );
   }
 }

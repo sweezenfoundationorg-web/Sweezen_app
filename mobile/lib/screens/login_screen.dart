@@ -43,8 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(res['message'] ?? 'OTP dispatched via Gmail SMTP!'),
+      const SnackBar(
+        content: Text('OTP sent to your Email address! Please check your inbox.'),
         backgroundColor: AppTheme.amberGold,
       ),
     );
@@ -193,27 +193,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ] else ...[
-                        if (_devOtp != null) ...[
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: AppTheme.primaryNavy,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppTheme.amberGold.withOpacity(0.4)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.mark_email_read, color: AppTheme.amberGold, size: 20),
-                                const SizedBox(width: 10),
-                                Text(
-                                  'Gmail SMTP OTP Code: $_devOtp',
-                                  style: const TextStyle(color: AppTheme.lightGold, fontWeight: FontWeight.bold, fontSize: 13),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
 
                         TextField(
                           controller: _otpController,
