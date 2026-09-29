@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../theme/app_theme.dart';
 import 'custom_gold_button.dart';
 
@@ -7,12 +9,14 @@ class UploadedDocResult {
   final String docType;
   final String fileSize;
   final String uploadDate;
+  final String? filePath;
 
   UploadedDocResult({
     required this.fileName,
     required this.docType,
     required this.fileSize,
     required this.uploadDate,
+    this.filePath,
   });
 }
 
@@ -41,6 +45,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
   late String _selectedDocType;
   String? _selectedFileName;
   String? _selectedFileSize;
+  String? _selectedFilePath;
 
   bool _isUploading = false;
   double _uploadProgress = 0.0;
@@ -68,10 +73,67 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
     _selectedDocType = widget.initialDocType;
   }
 
+  Future<void> _pickFromFileManager() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'],
+      );
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        final sizeInMb = (file.size / (1024 * 1024)).toStringAsFixed(1);
+        setState(() {
+          _selectedFileName = file.name;
+          _selectedFileSize = '${sizeInMb} MB';
+          _selectedFilePath = file.path;
+        });
+      }
+    } catch (e) {
+      debugPrint('FilePicker error: $e');
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        final length = await image.length();
+        final sizeInMb = (length / (1024 * 1024)).toStringAsFixed(1);
+        setState(() {
+          _selectedFileName = image.name;
+          _selectedFileSize = '${sizeInMb} MB';
+          _selectedFilePath = image.path;
+        });
+      }
+    } catch (e) {
+      debugPrint('ImagePicker gallery error: $e');
+    }
+  }
+
+  Future<void> _pickFromCamera() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(source: ImageSource.camera);
+      if (photo != null) {
+        final length = await photo.length();
+        final sizeInMb = (length / (1024 * 1024)).toStringAsFixed(1);
+        setState(() {
+          _selectedFileName = photo.name;
+          _selectedFileSize = '${sizeInMb} MB';
+          _selectedFilePath = photo.path;
+        });
+      }
+    } catch (e) {
+      debugPrint('ImagePicker camera error: $e');
+    }
+  }
+
   void _selectSampleFile(Map<String, String> file) {
     setState(() {
       _selectedFileName = file['name'];
       _selectedFileSize = file['size'];
+      _selectedFilePath = null;
     });
   }
 
@@ -118,6 +180,7 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
       docType: _selectedDocType,
       fileSize: _selectedFileSize ?? '1.5 MB',
       uploadDate: '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+      filePath: _selectedFilePath,
     );
 
     Navigator.of(context).pop(result);
@@ -220,17 +283,11 @@ class _DocumentUploadModalState extends State<DocumentUploadModal> {
             const SizedBox(height: 8),
             Row(
               children: [
-                _buildSourceChip(Icons.folder_open, 'File Manager', () {
-                  _selectSampleFile(_sampleFiles[0]);
-                }),
+                _buildSourceChip(Icons.folder_open, 'File Manager', _pickFromFileManager),
                 const SizedBox(width: 8),
-                _buildSourceChip(Icons.photo_library, 'Gallery', () {
-                  _selectSampleFile(_sampleFiles[1]);
-                }),
+                _buildSourceChip(Icons.photo_library, 'Gallery', _pickFromGallery),
                 const SizedBox(width: 8),
-                _buildSourceChip(Icons.camera_alt, 'Camera Scan', () {
-                  _selectSampleFile(_sampleFiles[3]);
-                }),
+                _buildSourceChip(Icons.camera_alt, 'Camera Scan', _pickFromCamera),
               ],
             ),
             const SizedBox(height: 20),

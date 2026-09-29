@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "631359600678",
+    "project_id": "sweezen-6f693",
+    "storage_bucket": "sweezen-6f693.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631359600678:android:faf977d9111375edb84ee7",
+        "android_client_info": {
+          "package_name": "com.sweezen.foundation.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOTS7fjww4dm5_ghFQfOOOt0xR2JZXsxY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

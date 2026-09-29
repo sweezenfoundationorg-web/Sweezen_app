@@ -67,18 +67,46 @@ exports.verifyOtp = async (req, res) => {
 
     // Check if user already exists
     let user = memoryDb.users.find(u => u.email === recipient || u.phone === recipient);
-    let token = null;
+    
+    if (!user) {
+      let derivedName = 'Sweezen Member';
+      if (recipient.includes('@')) {
+        const rawHandle = recipient.split('@')[0];
+        const cleanLetters = rawHandle.replace(/[0-9._]+/g, '');
+        if (cleanLetters.length > 0) {
+          derivedName = cleanLetters[0].toUpperCase() + cleanLetters.slice(1).toLowerCase();
+        } else {
+          derivedName = rawHandle[0].toUpperCase() + rawHandle.slice(1);
+        }
+      }
 
-    if (user) {
-      token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+      user = {
+        id: memoryDb.users.length + 1,
+        name: derivedName,
+        email: recipient.includes('@') ? recipient : `${recipient}@sweezen.org`,
+        phone: recipient.includes('@') ? '+91 9876543210' : recipient,
+        role: 'Volunteer',
+        profile_photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+        skills: ['Field Coordination', 'First Aid'],
+        interests: ['Healthcare', 'Education'],
+        location: 'Mumbai, Maharashtra',
+        availability: 'Weekends',
+        impact_points: 100,
+        badges: ['Registered Member'],
+        humanity_card_id: `SWZ-CARD-${Math.floor(1000 + Math.random() * 9000)}`,
+        created_at: new Date()
+      };
+      memoryDb.users.push(user);
     }
+
+    const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
 
     return res.status(200).json({
       success: true,
       message: 'OTP verified successfully',
-      isRegistered: !!user,
+      isRegistered: true,
       token: token,
-      user: user || null
+      user: user
     });
   } catch (err) {
     console.error('Verify OTP error:', err);

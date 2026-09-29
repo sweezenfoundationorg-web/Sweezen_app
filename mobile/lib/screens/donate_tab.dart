@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/models.dart';
 import '../providers/app_state_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -18,6 +19,7 @@ class _DonateTabState extends State<DonateTab> {
   final TextEditingController _nameController = TextEditingController(text: 'Aarav Sharma');
   final TextEditingController _emailController = TextEditingController(text: 'aarav@sweezenfoundation.org');
   final TextEditingController _panController = TextEditingController(text: 'ABCDE1234F');
+  final ScrollController _scrollController = ScrollController();
 
   String _donationType = 'One-Time'; // One-Time, Recurring
   int? _selectedProjectId; // null = General Fund
@@ -27,6 +29,28 @@ class _DonateTabState extends State<DonateTab> {
   bool _isProcessing = false;
 
   final List<int> _presetAmounts = [500, 1000, 2500, 5000, 10000];
+
+  void _scrollToForm() {
+    _scrollController.animateTo(
+      550,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _selectProgram(ProjectModel project) {
+    setState(() {
+      _selectedProjectId = project.id;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Selected Program: ${project.name}'),
+        backgroundColor: AppTheme.amberGold,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    _scrollToForm();
+  }
 
   void _handleInitiateDonation() async {
     final amtText = _amountController.text.trim();
@@ -73,7 +97,7 @@ class _DonateTabState extends State<DonateTab> {
             'amount': amount,
             'donor_name': _isAnonymous ? 'Anonymous Donor' : _nameController.text,
             'pan_number': _panController.text,
-            'project_name': _selectedProjectId != null ? 'Healthcare Mobile Unit Drive' : 'General Foundation Fund',
+            'project_name': _selectedProjectId != null ? 'Selected Foundation Program' : 'General Foundation Fund',
           },
         ),
       );
@@ -86,36 +110,239 @@ class _DonateTabState extends State<DonateTab> {
 
     return Scaffold(
       body: SingleChildScrollView(
+        controller: _scrollController,
         padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Banner
+            // Header Card in Dark Navy Theme
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: AppTheme.cardNavy,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.goldAccent.withOpacity(0.4)),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.4)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  )
+                ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.volunteer_activism, color: AppTheme.amberGold, size: 36),
-                  const SizedBox(width: 14),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryNavy,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppTheme.amberGold.withValues(alpha: 0.3)),
+                    ),
+                    child: const Icon(Icons.volunteer_activism, color: AppTheme.amberGold, size: 32),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        Text('BE THE REASON SOMEONE SMILES', style: TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 15)),
-                        SizedBox(height: 2),
-                        Text('100% of your contribution directly powers healthcare, digital pods & river protection.', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                        Text(
+                          'SWEEZEN DONATION HUB',
+                          style: TextStyle(
+                            color: AppTheme.amberGold,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          '100% Tax Exempted under 80G. Direct transparent funding for rural India.',
+                          style: TextStyle(
+                            color: AppTheme.textMuted,
+                            fontSize: 12,
+                            height: 1.3,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+
+            // FEATURED PROGRAMS SECTION WITH IMAGES AND "DONATE TO THIS PROGRAM" BUTTON
+            const Text(
+              'DONATE TO THIS PROGRAM:',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Select a specific campaign to directly transform lives with real-time impact tracking.',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            ),
+            const SizedBox(height: 14),
+
+            // Program Cards Horizontal Scroll in Dark Navy Theme
+            SizedBox(
+              height: 335,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: state.projects.length,
+                itemBuilder: (ctx, i) {
+                  final p = state.projects[i];
+                  final isSelected = _selectedProjectId == p.id;
+                  final percentageStr = (p.progressPercentage * 100).toStringAsFixed(0);
+
+                  final cat = p.category.toLowerCase();
+                  String assetFallback = 'assets/images/onboarding_healthcare.png';
+                  if (cat.contains('edu')) {
+                    assetFallback = 'assets/images/onboarding_education.png';
+                  } else if (cat.contains('envir') || cat.contains('green')) {
+                    assetFallback = 'assets/images/onboarding_environment.png';
+                  }
+
+                  return Container(
+                    width: 275,
+                    margin: const EdgeInsets.only(right: 14),
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardNavy,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isSelected ? AppTheme.amberGold : AppTheme.goldAccent.withValues(alpha: 0.3),
+                        width: isSelected ? 2.5 : 1.0,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        )
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Campaign Image Header with Category Badge & Asset Fallback
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+                              child: Image.network(
+                                p.imageUrl,
+                                height: 125,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                                errorBuilder: (ctx, err, stack) {
+                                  return Image.asset(
+                                    assetFallback,
+                                    height: 125,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  );
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              top: 10,
+                              left: 10,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.amberGold,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  p.category.toUpperCase(),
+                                  style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // Card Body
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                p.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on, size: 12, color: AppTheme.goldAccent),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      p.location,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(color: AppTheme.textMuted, fontSize: 11),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+
+                              // Progress Bar
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text('Raised: ₹${(p.fundingRaised / 1000).toStringAsFixed(0)}K', style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 11)),
+                                  Text('$percentageStr%', style: const TextStyle(color: AppTheme.lightGold, fontWeight: FontWeight.bold, fontSize: 11)),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: LinearProgressIndicator(
+                                  value: p.progressPercentage,
+                                  minHeight: 6,
+                                  backgroundColor: Colors.white10,
+                                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.amberGold),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+
+                              // Donate to this Program Button
+                              SizedBox(
+                                width: double.infinity,
+                                height: 40,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isSelected ? AppTheme.amberGold : AppTheme.primaryNavy,
+                                    foregroundColor: isSelected ? Colors.black : AppTheme.amberGold,
+                                    side: BorderSide(color: AppTheme.amberGold, width: isSelected ? 2 : 1),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                  icon: Icon(isSelected ? Icons.check_circle : Icons.favorite, size: 16),
+                                  label: Text(
+                                    isSelected ? 'SELECTED PROGRAM' : 'DONATE TO THIS PROGRAM',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                                  ),
+                                  onPressed: () => _selectProgram(p),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+            const SizedBox(height: 28),
 
             // 1. Donation Type Toggle
             Row(
@@ -165,7 +392,7 @@ class _DonateTabState extends State<DonateTab> {
                     margin: const EdgeInsets.only(right: 8),
                     child: ActionChip(
                       backgroundColor: isSelected ? AppTheme.amberGold : AppTheme.cardNavy,
-                      side: BorderSide(color: AppTheme.goldAccent.withOpacity(0.4)),
+                      side: BorderSide(color: AppTheme.goldAccent.withValues(alpha: 0.4)),
                       label: Text('₹$amt', style: TextStyle(color: isSelected ? Colors.black : Colors.white, fontWeight: FontWeight.bold)),
                       onPressed: () {
                         setState(() => _amountController.text = amt.toString());
@@ -220,28 +447,39 @@ class _DonateTabState extends State<DonateTab> {
             ),
             const SizedBox(height: 20),
 
-            // 5. 80G Tax Benefit & PAN
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              activeColor: AppTheme.amberGold,
-              title: const Text('Request 80G Tax Exemption Certificate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-              subtitle: const Text('Claim 50% tax deduction under Sec 80G of Income Tax Act', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
-              value: _is80GRequested,
-              onChanged: (val) => setState(() => _is80GRequested = val),
-            ),
-
-            if (_is80GRequested) ...[
-              const SizedBox(height: 10),
-              TextField(
-                controller: _panController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
-                  labelText: 'Donor PAN Number (Required for 80G)',
-                  prefixIcon: Icon(Icons.badge, color: AppTheme.goldAccent),
-                ),
+            // 5. 80G Tax Benefit Box in Dark Navy Theme
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.3)),
               ),
-            ],
-            const SizedBox(height: 12),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppTheme.amberGold,
+                    title: const Text('Request 80G Tax Exemption Certificate', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                    subtitle: const Text('Claim 50% tax deduction under Sec 80G of Income Tax Act', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                    value: _is80GRequested,
+                    onChanged: (val) => setState(() => _is80GRequested = val),
+                  ),
+                  if (_is80GRequested) ...[
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _panController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        labelText: 'Donor PAN Number (Required for 80G)',
+                        prefixIcon: Icon(Icons.badge, color: AppTheme.goldAccent),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
 
             // Anonymous Option
             CheckboxListTile(

@@ -22,7 +22,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'DIGITAL SMART PODS & LITERACY',
       'description':
           'Bridging the digital divide by equipping village schools with solar smart tablets, interactive learning modules, and trained digital educators.',
-      'imageUrl': 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+      'assetPath': 'assets/images/onboarding_education.png',
       'icon': Icons.school_rounded,
       'badge': 'UN SDG 4: Quality Education',
       'stats': '15,000+ Students Empowered',
@@ -32,7 +32,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'MOBILE HEALTH CAMPS & EYE CARE',
       'description':
           'Providing free comprehensive medical checkups, essential medicines, vision care, and maternal health support directly to underserved rural communities.',
-      'imageUrl': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
+      'assetPath': 'assets/images/onboarding_healthcare.png',
       'icon': Icons.medical_services_rounded,
       'badge': 'UN SDG 3: Good Health & Well-being',
       'stats': '48,000+ Medical Examinations',
@@ -42,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'GEO-TAGGED TREE PLANTATION & WATER',
       'description':
           'Driving sustainable climate action through community tree plantations, verified GPS geo-tagging, and clean drinking water filtration systems.',
-      'imageUrl': 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
+      'assetPath': 'assets/images/onboarding_environment.png',
       'icon': Icons.nature_people_rounded,
       'badge': 'UN SDG 13: Climate Action',
       'stats': '120,000+ Saplings Planted',
@@ -170,9 +170,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               borderRadius: BorderRadius.circular(22),
                               child: Stack(
                                 children: [
-                                  // Network Image with smooth fallback
-                                  Image.network(
-                                    slide['imageUrl'],
+                                  // Asset Image with smooth fallback
+                                  Image.asset(
+                                    slide['assetPath'],
                                     width: double.infinity,
                                     height: double.infinity,
                                     fit: BoxFit.cover,

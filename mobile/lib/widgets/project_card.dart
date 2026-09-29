@@ -43,12 +43,18 @@ class ProjectCard extends StatelessWidget {
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (ctx, err, stack) {
-                    return Container(
+                    final cat = project.category.toLowerCase();
+                    String assetPath = 'assets/images/onboarding_healthcare.png';
+                    if (cat.contains('edu')) {
+                      assetPath = 'assets/images/onboarding_education.png';
+                    } else if (cat.contains('envir') || cat.contains('green')) {
+                      assetPath = 'assets/images/onboarding_environment.png';
+                    }
+                    return Image.asset(
+                      assetPath,
                       height: 170,
-                      color: AppTheme.surfaceElevated,
-                      child: const Center(
-                        child: Icon(Icons.volunteer_activism, color: AppTheme.goldAccent, size: 48),
-                      ),
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     );
                   },
                 ),

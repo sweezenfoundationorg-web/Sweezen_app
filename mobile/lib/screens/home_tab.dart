@@ -213,7 +213,14 @@ class HomeTab extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppTheme.cardNavy,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.goldAccent.withOpacity(0.3)),
+        border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.25),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          )
+        ],
       ),
       child: Row(
         children: [
@@ -231,8 +238,8 @@ class HomeTab extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(value, style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(value, style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.w900, fontSize: 17)),
+                Text(label, style: const TextStyle(color: AppTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
               ],
             ),
           )

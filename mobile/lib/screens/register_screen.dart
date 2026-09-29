@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/models.dart';
 import '../providers/app_state_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -8,7 +9,9 @@ import '../widgets/document_upload_modal.dart';
 import 'main_shell_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  final String? initialTarget;
+
+  const RegisterScreen({Key? key, this.initialTarget}) : super(key: key);
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -36,6 +39,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _resumeUploaded = false;
 
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialTarget != null) {
+      final target = widget.initialTarget!;
+      if (target.contains('@')) {
+        _emailController.text = target;
+      } else {
+        _phoneController.text = target;
+      }
+    }
+  }
 
   final List<Map<String, dynamic>> _roles = [
     {'role': 'Volunteer', 'icon': Icons.volunteer_activism, 'desc': 'Participate in field drives, health camps, & community outreach.'},
@@ -99,7 +115,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (res['success'] == true) {
       final state = Provider.of<AppStateProvider>(context, listen: false);
-      state.loginUser(state.currentUser!);
+      if (res['user'] != null && res['user'] is Map) {
+        state.loginUser(UserModel.fromJson(Map<String, dynamic>.from(res['user'])));
+      } else {
+        final newUser = UserModel(
+          id: DateTime.now().millisecondsSinceEpoch % 10000,
+          name: _nameController.text.trim(),
+          email: _emailController.text.trim().isEmpty ? 'member@sweezenfoundation.org' : _emailController.text.trim(),
+          phone: _phoneController.text.trim(),
+          role: _selectedRole,
+          profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+          skills: _skillsController.text.split(','),
+          interests: ['Healthcare', 'Education'],
+          location: _locationController.text.trim().isEmpty ? 'India' : _locationController.text.trim(),
+          availability: _selectedAvailability,
+          impactPoints: 50,
+          badges: ['Registered Member'],
+          humanityCardId: 'SWZ-CARD-${DateTime.now().millisecondsSinceEpoch % 9000 + 1000}',
+        );
+        state.loginUser(newUser);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Registration completed successfully! Welcome to Sweezen.'), backgroundColor: AppTheme.successGreen),

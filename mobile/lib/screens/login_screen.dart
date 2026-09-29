@@ -69,14 +69,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (res['success'] == true) {
       final state = Provider.of<AppStateProvider>(context, listen: false);
-      if (res['user'] != null && res['user'] is Map<String, dynamic>) {
-        state.loginUser(UserModel.fromJson(Map<String, dynamic>.from(res['user'])));
+      final isRegistered = res['isRegistered'] ?? (res['user'] != null);
+      
+      if (isRegistered && res['user'] != null && res['user'] is Map) {
+        final userModel = UserModel.fromJson(Map<String, dynamic>.from(res['user']));
+        state.loginUser(userModel);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Welcome back, ${userModel.name}! Logged in successfully.'), backgroundColor: AppTheme.successGreen),
+        );
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainShellScreen()),
+        );
       } else {
-        state.loginUser(state.currentUser!);
+        // User not registered on backend, navigate to registration screen with target email/phone pre-filled
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('OTP Verified! Please complete your registration to continue.'), backgroundColor: AppTheme.amberGold),
+        );
+
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => RegisterScreen(
+              initialTarget: target,
+            ),
+          ),
+        );
       }
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShellScreen()),
-      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(res['message'] ?? 'Invalid OTP code'), backgroundColor: AppTheme.errorRed),

@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/models.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
@@ -19,8 +22,11 @@ class _VolunteerTabState extends State<VolunteerTab> {
     final remarksController = TextEditingController(text: task.remarks);
     String status = task.status == 'Pending' ? 'In Progress' : 'Completed';
     bool photoCaptured = task.photoUrl != null;
+    String? pickedPhotoPath;
     double lat = task.geoLat ?? 23.3441;
     double lng = task.geoLng ?? 85.3096;
+    bool isLocating = false;
+    String locationStatusMsg = 'Fetching live device location...';
 
     showModalBottomSheet(
       context: context,
@@ -30,8 +36,78 @@ class _VolunteerTabState extends State<VolunteerTab> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (modalCtx, setModalState) {
+            // Function to fetch real device GPS location
+            Future<void> fetchRealLocation() async {
+              setModalState(() {
+                isLocating = true;
+                locationStatusMsg = 'Acquiring GPS Satellite Signal...';
+              });
+              try {
+                bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                if (!serviceEnabled) {
+                  setModalState(() {
+                    isLocating = false;
+                    locationStatusMsg = 'GPS service disabled. Enable Location on phone.';
+                  });
+                  return;
+                }
+                LocationPermission permission = await Geolocator.checkPermission();
+                if (permission == LocationPermission.denied) {
+                  permission = await Geolocator.requestPermission();
+                  if (permission == LocationPermission.denied) {
+                    setModalState(() {
+                      isLocating = false;
+                      locationStatusMsg = 'Location permission denied by user.';
+                    });
+                    return;
+                  }
+                }
+                if (permission == LocationPermission.deniedForever) {
+                  setModalState(() {
+                    isLocating = false;
+                    locationStatusMsg = 'Location permission permanently denied.';
+                  });
+                  return;
+                }
+                final pos = await Geolocator.getCurrentPosition(
+                  desiredAccuracy: LocationAccuracy.high,
+                  timeLimit: const Duration(seconds: 10),
+                );
+                setModalState(() {
+                  lat = pos.latitude;
+                  lng = pos.longitude;
+                  isLocating = false;
+                  locationStatusMsg = 'GPS GEO-TAG: Active & Verified';
+                });
+              } catch (e) {
+                setModalState(() {
+                  isLocating = false;
+                  locationStatusMsg = 'GPS Active (Default: ${lat.toStringAsFixed(4)}°, ${lng.toStringAsFixed(4)}°)';
+                });
+              }
+            }
+
+            // Function to pick photo from device camera or gallery
+            Future<void> pickPhoto(ImageSource source) async {
+              try {
+                final picker = ImagePicker();
+                final XFile? photo = await picker.pickImage(
+                  source: source,
+                  imageQuality: 85,
+                );
+                if (photo != null) {
+                  setModalState(() {
+                    pickedPhotoPath = photo.path;
+                    photoCaptured = true;
+                  });
+                }
+              } catch (e) {
+                debugPrint('Camera/Gallery pick error: $e');
+              }
+            }
+
             return Container(
-              height: MediaQuery.of(context).size.height * 0.85,
+              height: MediaQuery.of(context).size.height * 0.88,
               padding: const EdgeInsets.all(20),
               child: SingleChildScrollView(
                 child: Column(
@@ -57,59 +133,134 @@ class _VolunteerTabState extends State<VolunteerTab> {
                       decoration: BoxDecoration(
                         color: AppTheme.primaryNavy,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.3)),
+                        border: Border.all(color: isLocating ? AppTheme.amberGold : AppTheme.goldAccent.withValues(alpha: 0.4)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.gps_fixed, color: AppTheme.amberGold, size: 22),
+                          Icon(
+                            isLocating ? Icons.gps_not_fixed : Icons.my_location,
+                            color: AppTheme.amberGold,
+                            size: 24,
+                          ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('GPS AUTO GEO-TAGGING ACTIVE', style: TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 11)),
-                                Text('Coordinates: ${lat.toStringAsFixed(4)}° N, ${lng.toStringAsFixed(4)}° E', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                                Row(
+                                  children: [
+                                    Text(locationStatusMsg, style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 11)),
+                                    if (isLocating) ...[
+                                      const SizedBox(width: 6),
+                                      const SizedBox(
+                                        width: 10,
+                                        height: 10,
+                                        child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.amberGold),
+                                      ),
+                                    ]
+                                  ],
+                                ),
+                                Text(
+                                  'LAT: ${lat.toStringAsFixed(5)}° N | LNG: ${lng.toStringAsFixed(5)}° E',
+                                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
                               ],
                             ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.refresh, color: AppTheme.goldAccent),
+                            tooltip: 'Fetch Live GPS Location',
+                            onPressed: isLocating ? null : fetchRealLocation,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 16),
 
-                    // Camera photo capture
+                    // Camera & Gallery photo capture section
                     const Text('FIELD PHOTOGRAPH ATTACHMENT:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     const SizedBox(height: 8),
 
-                    GestureDetector(
-                      onTap: () {
-                        setModalState(() => photoCaptured = true);
-                      },
-                      child: Container(
-                        height: 140,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryNavy,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: photoCaptured ? AppTheme.successGreen : AppTheme.goldAccent.withValues(alpha: 0.4), width: photoCaptured ? 2 : 1),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryNavy,
+                              foregroundColor: AppTheme.amberGold,
+                              side: const BorderSide(color: AppTheme.goldAccent),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            icon: const Icon(Icons.camera_alt, size: 18),
+                            label: const Text('CAMERA SCAN', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                            onPressed: () => pickPhoto(ImageSource.camera),
+                          ),
                         ),
-                        child: photoCaptured
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  task.photoUrl ?? 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80',
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(Icons.camera_alt, color: AppTheme.amberGold, size: 36),
-                                  SizedBox(height: 6),
-                                  Text('Tap to Capture Geo-Tagged Photo', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryNavy,
+                              foregroundColor: AppTheme.amberGold,
+                              side: const BorderSide(color: AppTheme.goldAccent),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            icon: const Icon(Icons.photo_library, size: 18),
+                            label: const Text('GALLERY PICK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                            onPressed: () => pickPhoto(ImageSource.gallery),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Preview of captured photo
+                    Container(
+                      height: 150,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryNavy,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: photoCaptured ? AppTheme.successGreen : AppTheme.goldAccent.withValues(alpha: 0.4), width: photoCaptured ? 2 : 1),
+                      ),
+                      child: pickedPhotoPath != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.file(File(pickedPhotoPath!), fit: BoxFit.cover),
+                                  Positioned(
+                                    bottom: 8,
+                                    left: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      color: Colors.black54,
+                                      child: Text(
+                                        'GPS: ${lat.toStringAsFixed(4)}°, ${lng.toStringAsFixed(4)}°',
+                                        style: const TextStyle(color: AppTheme.amberGold, fontSize: 10, fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
-                      ),
+                            )
+                          : (photoCaptured
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(
+                                    task.photoUrl ?? 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&q=80',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.add_a_photo_outlined, color: AppTheme.amberGold, size: 36),
+                                    SizedBox(height: 6),
+                                    Text('Tap Camera Scan or Gallery Pick Above', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                  ],
+                                )),
                     ),
                     const SizedBox(height: 16),
 

@@ -59,47 +59,54 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           opacity: _fadeAnimation,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Eagle Logo Asset
+              // Eagle Logo Asset Centered Badge (Square format)
               Container(
-                padding: const EdgeInsets.all(20),
+                width: 140,
+                height: 140,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  borderRadius: BorderRadius.circular(20),
                   color: AppTheme.cardNavy,
-                  border: Border.all(color: AppTheme.goldAccent.withOpacity(0.4), width: 2),
+                  border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.6), width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.amberGold.withOpacity(0.3),
-                      blurRadius: 25,
-                      spreadRadius: 2,
+                      color: AppTheme.amberGold.withValues(alpha: 0.35),
+                      blurRadius: 30,
+                      spreadRadius: 4,
                     )
                   ],
                 ),
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  height: 110,
-                  fit: BoxFit.contain,
-                  errorBuilder: (ctx, err, stack) {
-                    return const Icon(Icons.shield, color: AppTheme.goldAccent, size: 80);
-                  },
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.contain,
+                      errorBuilder: (ctx, err, stack) {
+                        return const Icon(Icons.shield, color: AppTheme.goldAccent, size: 80);
+                      },
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(height: 28),
 
-              Text(
+              const Text(
                 'SWEEZEN',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: AppTheme.goldAccent,
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 4.0,
-                  shadows: [
-                    Shadow(color: AppTheme.amberGold.withOpacity(0.5), blurRadius: 10),
-                  ],
                 ),
               ),
               const Text(
                 'FOUNDATION',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
@@ -114,10 +121,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 decoration: BoxDecoration(
                   color: AppTheme.cardNavy,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppTheme.goldAccent.withOpacity(0.3)),
+                  border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.3)),
                 ),
                 child: const Text(
                   'SECTION 8 NON-PROFIT | UN SDG ALIGNED',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     color: AppTheme.amberGold,
                     fontSize: 10,

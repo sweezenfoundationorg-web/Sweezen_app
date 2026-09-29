@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/models.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  static const String baseUrl = 'https://sweezen-backend-api.onrender.com/api';
 
   // Request OTP via Gmail SMTP
   static Future<Map<String, dynamic>> requestOtp(String recipient) async {
@@ -36,14 +36,25 @@ class ApiService {
     } catch (e) {
       // Fallback
     }
+    String derivedName = 'Sweezen Member';
+    if (recipient.contains('@')) {
+      final rawHandle = recipient.split('@').first;
+      final cleanLetters = rawHandle.replaceAll(RegExp(r'[0-9._]+'), '');
+      if (cleanLetters.isNotEmpty) {
+        derivedName = cleanLetters[0].toUpperCase() + cleanLetters.substring(1).toLowerCase();
+      } else {
+        derivedName = rawHandle[0].toUpperCase() + rawHandle.substring(1);
+      }
+    }
+
     return {
       'success': true,
       'isRegistered': true,
       'token': 'mock_jwt_token_8892',
       'user': {
         'id': 1,
-        'name': 'Aarav Sharma',
-        'email': recipient.contains('@') ? recipient : 'aarav@sweezenfoundation.org',
+        'name': derivedName,
+        'email': recipient.contains('@') ? recipient : '$recipient@sweezenfoundation.org',
         'phone': recipient.contains('@') ? '+91 9876543210' : recipient,
         'role': 'Volunteer',
         'profile_photo': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
