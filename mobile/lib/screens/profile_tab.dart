@@ -305,7 +305,7 @@ class _ProfileTabState extends State<ProfileTab> {
       context: context,
       builder: (dialogCtx) {
         return AlertDialog(
-          backgroundColor: AppTheme.navyDark,
+          backgroundColor: AppTheme.primaryNavy,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
             side: const BorderSide(color: AppTheme.goldAccent, width: 1.5),

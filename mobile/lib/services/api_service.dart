@@ -203,4 +203,33 @@ class ApiService {
     }
     throw Exception('Failed to fetch events from backend (Status: ${res.statusCode})');
   }
+
+  // Setup Google 2FA (TOTP)
+  static Future<Map<String, dynamic>> setup2FA(String email) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/auth/setup-2fa'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+      if (res.statusCode == 200) return jsonDecode(res.body);
+      return {'success': false, 'message': 'Failed to setup 2FA'};
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
+
+  // Verify Google 2FA (TOTP)
+  static Future<Map<String, dynamic>> verify2FA(String token, String secret) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/auth/verify-2fa'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'secret': secret}),
+      );
+      return jsonDecode(res.body);
+    } catch (e) {
+      return {'success': false, 'message': e.toString()};
+    }
+  }
 }
