@@ -22,6 +22,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'DIGITAL SMART PODS & LITERACY',
       'description':
           'Bridging the digital divide by equipping village schools with solar smart tablets, interactive learning modules, and trained digital educators.',
+      'imageUrl': 'https://res.cloudinary.com/dbaqhwxka/image/upload/v1776157346/gallery/nogldjagtheozvdfip30.jpg',
       'assetPath': 'assets/images/onboarding_education.png',
       'icon': Icons.school_rounded,
       'badge': 'UN SDG 4: Quality Education',
@@ -32,6 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'MOBILE HEALTH CAMPS & EYE CARE',
       'description':
           'Providing free comprehensive medical checkups, essential medicines, vision care, and maternal health support directly to underserved rural communities.',
+      'imageUrl': 'https://res.cloudinary.com/dbaqhwxka/image/upload/v1787939951/gallery/swpsfsx46w9vbohcwbxp.jpg',
       'assetPath': 'assets/images/onboarding_healthcare.png',
       'icon': Icons.medical_services_rounded,
       'badge': 'UN SDG 3: Good Health & Well-being',
@@ -42,6 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'subtitle': 'GEO-TAGGED TREE PLANTATION & WATER',
       'description':
           'Driving sustainable climate action through community tree plantations, verified GPS geo-tagging, and clean drinking water filtration systems.',
+      'imageUrl': 'https://res.cloudinary.com/dbaqhwxka/image/upload/v1788111421/gallery/u3zpjanxdr0if1fvbpgn.jpg',
       'assetPath': 'assets/images/onboarding_environment.png',
       'icon': Icons.nature_people_rounded,
       'badge': 'UN SDG 13: Climate Action',
@@ -151,9 +154,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 10),
-                          // Visual Hero Banner Container
+                          // Visual Hero Banner Container with Real Cloudinary Image
                           Container(
-                            height: size.height * 0.32,
+                            height: size.height * 0.34,
                             width: double.infinity,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(24),
@@ -170,17 +173,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               borderRadius: BorderRadius.circular(22),
                               child: Stack(
                                 children: [
-                                  // Asset Image with smooth fallback
-                                  Image.asset(
-                                    slide['assetPath'],
+                                  // Network Image from official website gallery with asset fallback
+                                  Image.network(
+                                    slide['imageUrl'],
                                     width: double.infinity,
                                     height: double.infinity,
                                     fit: BoxFit.cover,
                                     errorBuilder: (ctx, err, stack) {
-                                      return Container(
-                                        color: AppTheme.cardNavy,
-                                        child: Center(
-                                          child: Icon(slide['icon'], size: 80, color: AppTheme.goldAccent),
+                                      return Image.asset(
+                                        slide['assetPath'],
+                                        width: double.infinity,
+                                        height: double.infinity,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (c, e, s) => Container(
+                                          color: AppTheme.cardNavy,
+                                          child: Center(child: Icon(slide['icon'], size: 80, color: AppTheme.goldAccent)),
                                         ),
                                       );
                                     },
@@ -209,7 +216,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(0.7),
+                                        color: Colors.black.withOpacity(0.75),
                                         borderRadius: BorderRadius.circular(20),
                                         border: Border.all(color: AppTheme.amberGold.withOpacity(0.5)),
                                       ),
@@ -238,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                       decoration: BoxDecoration(
-                                        color: AppTheme.amberGold.withOpacity(0.9),
+                                        color: AppTheme.amberGold.withOpacity(0.95),
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Text(
