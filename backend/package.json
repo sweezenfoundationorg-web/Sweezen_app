@@ -23,6 +23,8 @@
     "multer": "^2.4.0",
     "nodemailer": "^10.0.12",
     "pg": "^8.23.0",
-    "razorpay": "^2.9.8"
+    "qrcode": "^1.5.4",
+    "razorpay": "^2.9.8",
+    "speakeasy": "^2.0.0"
   }
 }

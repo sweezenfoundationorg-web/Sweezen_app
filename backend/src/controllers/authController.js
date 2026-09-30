@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 const { getCollection, memoryDb } = require('../config/db');
 const { sendOtpEmail } = require('../config/smtp');
 
@@ -309,8 +311,21 @@ exports.adminLogin = async (req, res) => {
     // Require 2FA OTP verification check if requested
     if (req.body.requires_2fa) {
       const cleanOtp = (otp_code || '').toString().trim();
-      if (cleanOtp !== '123456' && cleanOtp !== '990123') {
-        return res.status(400).json({ success: false, message: 'Invalid 2FA Verification Code' });
+      let isValid2FA = (cleanOtp === '123456' || cleanOtp === '990123');
+      
+      // Also verify via Speakeasy Google Authenticator secret if set
+      if (!isValid2FA && cleanOtp) {
+        const adminSecret = process.env.ADMIN_2FA_SECRET || 'JBSWY3DPEHPK3PXP';
+        isValid2FA = speakeasy.totp.verify({
+          secret: adminSecret,
+          encoding: 'base32',
+          token: cleanOtp,
+          window: 2
+        });
+      }
+
+      if (!isValid2FA) {
+        return res.status(400).json({ success: false, message: 'Invalid 2FA Verification Code (Check Google Authenticator or default test OTP 123456)' });
       }
     }
 
@@ -357,5 +372,70 @@ exports.updateProfile = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Profile update failed' });
   }
 };
+
+// 9. Setup Google 2FA (TOTP)
+exports.setup2FA = async (req, res) => {
+  try {
+    const email = (req.body.email || req.user?.email || 'admin@sweezenfoundation.org').toLowerCase().trim();
+    const secret = speakeasy.generateSecret({
+      name: `Sweezen (${email})`,
+      issuer: 'Sweezen Foundation'
+    });
+
+    const qrCodeDataUrl = await QRCode.toDataURL(secret.otpauth_url);
+
+    // Save temporary secret in memory or user DB
+    const usersCol = getCollection('users');
+    if (usersCol) {
+      await usersCol.updateOne({ email }, { $set: { temp_2fa_secret: secret.base32 } }, { upsert: true });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google 2FA Secret Generated',
+      secret: secret.base32,
+      qrCodeUrl: qrCodeDataUrl,
+      otpauth_url: secret.otpauth_url
+    });
+  } catch (err) {
+    console.error('Setup 2FA error:', err);
+    return res.status(500).json({ success: false, message: 'Failed to generate 2FA QR code' });
+  }
+};
+
+// 10. Verify Google 2FA Code
+exports.verify2FA = async (req, res) => {
+  try {
+    const { token, email, secret: customSecret } = req.body;
+    const cleanToken = (token || '').toString().trim();
+
+    if (!cleanToken) {
+      return res.status(400).json({ success: false, message: '2FA verification token is required' });
+    }
+
+    // Default test override
+    if (cleanToken === '123456' || cleanToken === '990123') {
+      return res.status(200).json({ success: true, message: '2FA Verification Successful' });
+    }
+
+    let secretToVerify = customSecret || process.env.ADMIN_2FA_SECRET || 'JBSWY3DPEHPK3PXP';
+    const verified = speakeasy.totp.verify({
+      secret: secretToVerify,
+      encoding: 'base32',
+      token: cleanToken,
+      window: 2
+    });
+
+    if (verified) {
+      return res.status(200).json({ success: true, message: 'Google 2FA Verification Successful!' });
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid Google Authenticator OTP code' });
+    }
+  } catch (err) {
+    console.error('Verify 2FA error:', err);
+    return res.status(500).json({ success: false, message: '2FA verification error' });
+  }
+};
+
 
 

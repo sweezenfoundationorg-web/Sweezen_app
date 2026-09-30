@@ -27,6 +27,9 @@ router.post('/auth/register', authController.registerMultiStep);
 router.post('/auth/login', authController.login);
 router.post('/auth/admin-login', authController.adminLogin);
 
+router.post('/auth/setup-2fa', authController.setup2FA);
+router.post('/auth/verify-2fa', authController.verify2FA);
+
 router.get('/auth/profile', authController.getProfile);
 router.get('/auth/me', authController.getProfile);
 router.put('/auth/profile', authController.updateProfile);

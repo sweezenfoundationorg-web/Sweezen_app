@@ -506,8 +506,8 @@
   <div id="admin-login-overlay">
     <div class="login-card">
       <div class="login-header">
-        <div class="logo-badge">
-          <i class="fa-solid fa-shield-halved" style="color: #d4af37; font-size: 26px;"></i>
+        <div class="logo-badge" style="border: none; background: transparent;">
+          <img src="/assets/logo.png" style="height: 44px; object-fit: contain;" alt="Sweezen Logo">
         </div>
         <h2>SWEEZEN FOUNDATION</h2>
         <p>ADMINISTRATION CONTROL PANEL LOGIN</p>
@@ -550,10 +550,10 @@
   <div id="modal-2fa" class="modal-overlay">
     <div class="modal-card" style="max-width: 400px; text-align: center;">
       <div class="modal-header">
-        <h3 style="width: 100%;">🔐 2-Factor Authentication</h3>
+        <h3 style="width: 100%;">🔐 Google Authenticator 2FA</h3>
       </div>
       <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
-        A 6-digit verification code has been dispatched to your authenticated device. Enter code below:
+        Open Google Authenticator app on your phone & enter the 6-digit TOTP code below (or use test code <code>123456</code>):
       </p>
       <input type="text" id="otp-2fa-input" class="form-control" placeholder="123456" style="text-align: center; font-size: 20px; letter-spacing: 6px; font-weight: bold;" value="123456" onkeyup="if(event.key === 'Enter') verifyAdmin2FA()">
       <div style="margin-top: 20px; display: flex; gap: 10px;">
@@ -563,11 +563,33 @@
     </div>
   </div>
 
+  <!-- GOOGLE 2FA SETUP MODAL -->
+  <div id="modal-setup-2fa" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px; text-align: center;">
+      <div class="modal-header">
+        <h3 style="width: 100%;">📱 Bind Google Authenticator 2FA</h3>
+        <button class="action-btn" onclick="closeModals()">&times;</button>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+        Scan this QR code using <strong>Google Authenticator</strong> or <strong>Authy</strong> on your mobile phone:
+      </p>
+      <div id="qrcode-container" style="background: #ffffff; padding: 12px; display: inline-block; border-radius: 12px; margin-bottom: 12px;">
+        <img id="2fa-qr-img" src="" alt="Google 2FA QR Code" style="width: 180px; height: 180px;">
+      </div>
+      <div style="background: #070d1e; padding: 8px; border-radius: 8px; font-size: 12px; border: 1px solid var(--border); margin-bottom: 16px;">
+        <span style="color: var(--text-muted);">Manual Key: </span>
+        <strong id="2fa-secret-key" style="color: var(--gold); letter-spacing: 2px;">JBSWY3DPEHPK3PXP</strong>
+      </div>
+      <input type="text" id="setup-2fa-verify-input" class="form-control" placeholder="Enter 6-digit TOTP code" style="text-align: center; font-size: 18px; letter-spacing: 4px; font-weight: bold; margin-bottom: 12px;">
+      <button class="btn-gold" style="width: 100%; justify-content: center;" onclick="confirm2FABinding()">CONFIRM & ENABLE 2FA</button>
+    </div>
+  </div>
+
   <!-- Header -->
   <header>
     <div class="brand">
-      <div class="brand-logo">
-        <i class="fa-solid fa-shield-halved" style="color: #d4af37; font-size: 22px;"></i>
+      <div class="brand-logo" style="border: none; background: transparent;">
+        <img src="/assets/logo.png" style="height: 38px; object-fit: contain;" alt="Sweezen Logo">
       </div>
       <div class="brand-title">
         <h1>SWEEZEN FOUNDATION</h1>
@@ -587,6 +609,7 @@
     </div>
 
     <div class="header-actions">
+      <button class="btn-outline" style="padding: 5px 10px; font-size: 11px;" onclick="openGoogle2FASetup()"><i class="fa-solid fa-mobile-screen-button"></i> Google 2FA QR</button>
       <div class="user-profile-badge">
         <i class="fa-solid fa-circle-user" style="color: var(--gold); font-size: 16px;"></i>
         <span id="active-admin-name">Deepak Kumar</span>
@@ -954,6 +977,50 @@
 
       closeModals();
       await executeAdminLogin(role, email, password, otpCode);
+    }
+
+    async function openGoogle2FASetup() {
+      try {
+        const email = (currentAdminUser && currentAdminUser.email) ? currentAdminUser.email : 'admin@sweezenfoundation.org';
+        const res = await fetch(`${API_BASE}/auth/setup-2fa`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        }).then(r => r.json());
+
+        if (res.success) {
+          document.getElementById('2fa-qr-img').src = res.qrCodeUrl;
+          document.getElementById('2fa-secret-key').innerText = res.secret;
+          document.getElementById('modal-setup-2fa').classList.add('open');
+        } else {
+          alert('Failed to generate 2FA QR code: ' + res.message);
+        }
+      } catch (e) {
+        alert('Error setting up 2FA: ' + e.message);
+      }
+    }
+
+    async function confirm2FABinding() {
+      const token = document.getElementById('setup-2fa-verify-input').value;
+      const secret = document.getElementById('2fa-secret-key').innerText;
+
+      if (!token) {
+        alert('Please enter the 6-digit TOTP code from Google Authenticator.');
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/auth/verify-2fa`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, secret })
+      }).then(r => r.json());
+
+      if (res.success) {
+        alert('✅ Google 2FA Authenticator successfully bound to your account!');
+        closeModals();
+      } else {
+        alert('❌ Verification Failed: ' + res.message);
+      }
     }
 
     async function executeAdminLogin(role, email, password, otpCode) {

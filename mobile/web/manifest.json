@@ -1,6 +1,6 @@
 {
-  "name": "Sweezen Foundation",
-  "short_name": "Sweezen",
+    "name": "Sweezen Foundation",
+    "short_name": "Sweezen",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0b132b",

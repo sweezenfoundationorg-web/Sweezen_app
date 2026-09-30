@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 
@@ -6,6 +8,10 @@ class AppStateProvider extends ChangeNotifier {
   String _currentLanguage = 'en';
   UserModel? _currentUser;
   bool _isLoggedIn = false;
+
+  bool _isAppLockEnabled = false;
+  bool _isAppUnlocked = false;
+  final LocalAuthentication _localAuth = LocalAuthentication();
 
   List<ProjectModel> _projects = [];
   List<TaskModel> _assignedTasks = [];
@@ -33,6 +39,9 @@ class AppStateProvider extends ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn;
   bool get onboardingCompleted => _onboardingCompleted;
 
+  bool get isAppLockEnabled => _isAppLockEnabled;
+  bool get isAppUnlocked => _isAppUnlocked;
+
   void completeOnboarding() {
     _onboardingCompleted = true;
     notifyListeners();
@@ -47,6 +56,85 @@ class AppStateProvider extends ChangeNotifier {
 
   AppStateProvider() {
     _initDefaults();
+    loadAppLockSettings();
+  }
+
+  Future<void> loadAppLockSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isAppLockEnabled = prefs.getBool('app_lock_enabled') ?? false;
+      _isAppUnlocked = !_isAppLockEnabled; // If lock is enabled, start locked until biometrics scanned
+      notifyListeners();
+    } catch (e) {
+      debugPrint('AppLock settings load error: $e');
+    }
+  }
+
+  Future<bool> checkBiometricsAvailable() async {
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isSupported = await _localAuth.isDeviceSupported();
+      return canCheck || isSupported;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> toggleAppLock(bool enable) async {
+    if (enable) {
+      final isAvailable = await checkBiometricsAvailable();
+      if (!isAvailable) {
+        // Fallback: Enable lock with PIN/Device credentials
+      }
+      final authenticated = await authenticateAndUnlock(reason: 'Authenticate fingerprint to enable App Lock');
+      if (authenticated) {
+        _isAppLockEnabled = true;
+        _isAppUnlocked = true;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('app_lock_enabled', true);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    } else {
+      final authenticated = await authenticateAndUnlock(reason: 'Authenticate fingerprint to disable App Lock');
+      if (authenticated) {
+        _isAppLockEnabled = false;
+        _isAppUnlocked = true;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('app_lock_enabled', false);
+        notifyListeners();
+        return true;
+      }
+      return false;
+    }
+  }
+
+  Future<bool> authenticateAndUnlock({String reason = 'Scan fingerprint or enter PIN to unlock Sweezen Foundation App'}) async {
+    try {
+      final bool didAuthenticate = await _localAuth.authenticate(
+        localizedReason: reason,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+          biometricOnly: false,
+        ),
+      );
+      if (didAuthenticate) {
+        _isAppUnlocked = true;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Biometric auth error: $e');
+    }
+    return false;
+  }
+
+  void forceLockApp() {
+    if (_isAppLockEnabled) {
+      _isAppUnlocked = false;
+      notifyListeners();
+    }
   }
 
   void _initDefaults() {

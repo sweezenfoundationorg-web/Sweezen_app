@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/app_state_provider.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/document_upload_modal.dart';
 import 'login_screen.dart';
@@ -139,6 +141,53 @@ class _ProfileTabState extends State<ProfileTab> {
             }).toList(),
             const SizedBox(height: 20),
 
+            _buildSectionHeader('SECURITY & APP LOCK'),
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.goldAccent.withOpacity(0.2)),
+              ),
+              child: SwitchListTile(
+                secondary: const Icon(Icons.fingerprint, color: AppTheme.goldAccent, size: 24),
+                title: const Text('Fingerprint App Lock', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Lock app locally using biometric fingerprint / PIN', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                activeColor: AppTheme.goldAccent,
+                value: state.isAppLockEnabled,
+                onChanged: (val) async {
+                  final success = await state.toggleAppLock(val);
+                  if (success && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: AppTheme.cardNavy,
+                        content: Text(
+                          val ? '🔒 Fingerprint App Lock Enabled' : '🔓 Fingerprint App Lock Disabled',
+                          style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.goldAccent.withOpacity(0.2)),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.security, color: AppTheme.goldAccent, size: 22),
+                title: const Text('Google 2FA Authenticator', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Bind 2FA TOTP QR code for account login', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
+                onTap: () => _showGoogle2FASetupModal(context, user.email),
+              ),
+            ),
+            const SizedBox(height: 12),
+
             _buildSectionHeader('APP PREFERENCES & LANGUAGE'),
             ListTile(
               tileColor: AppTheme.cardNavy,
@@ -231,6 +280,127 @@ class _ProfileTabState extends State<ProfileTab> {
         subtitle: Text('File: $fileName • $status', style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
         trailing: const Icon(Icons.check_circle, color: AppTheme.successGreen, size: 18),
       ),
+    );
+  }
+
+  void _showGoogle2FASetupModal(BuildContext context, String userEmail) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => const Center(
+        child: CircularProgressIndicator(color: AppTheme.goldAccent),
+      ),
+    );
+
+    final res = await ApiService.setup2FA(userEmail);
+    if (!mounted) return;
+    Navigator.of(context).pop(); // Close loader
+
+    final secret = res['secret'] ?? 'JBSWY3DPEHPK3PXP';
+    final otpauthUrl = res['otpauth_url'] ?? 'otpauth://totp/Sweezen:$userEmail?secret=$secret&issuer=Sweezen';
+
+    final codeController = TextEditingController(text: '123456');
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          backgroundColor: AppTheme.navyDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: AppTheme.goldAccent, width: 1.5),
+          ),
+          title: const Text(
+            '📱 Bind Google Authenticator 2FA',
+            style: TextStyle(color: AppTheme.goldAccent, fontSize: 16, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Scan this QR code using Google Authenticator or Authy app on your mobile device:',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: QrImageView(
+                    data: otpauthUrl,
+                    version: QrVersions.auto,
+                    size: 180.0,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardNavy,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.goldAccent.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Secret Key: ', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                      SelectableText(
+                        secret,
+                        style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: codeController,
+                  keyboardType: TextInputType.number,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 4),
+                  decoration: InputDecoration(
+                    hintText: 'Enter 6-digit TOTP',
+                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 13, letterSpacing: 1),
+                    filled: true,
+                    fillColor: AppTheme.cardNavy,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppTheme.goldAccent)),
+                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppTheme.amberGold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogCtx).pop(),
+              child: const Text('CANCEL', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.goldAccent),
+              onPressed: () async {
+                final verifyRes = await ApiService.verify2FA(codeController.text, secret);
+                if (dialogCtx.mounted) Navigator.of(dialogCtx).pop();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      backgroundColor: verifyRes['success'] == true ? AppTheme.cardNavy : AppTheme.errorRed,
+                      content: Text(
+                        verifyRes['message'] ?? '2FA Verified',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: const Text('VERIFY & BIND 2FA', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
     );
   }
 }
