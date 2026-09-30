@@ -339,11 +339,30 @@ class _DonateTabState extends State<DonateTab> {
 
   void _finalizePaymentWithDetails(String paymentId, String signature) async {
     try {
+      final amountVal = double.tryParse(_amountController.text) ?? 1000.0;
+      final fallbackDetails = {
+        'receiptId': 'SWZ_RCPT_${DateTime.now().millisecondsSinceEpoch}',
+        'amount': amountVal,
+        'project_id': _selectedProjectId,
+        'donation_type': _donationType,
+        'donor_name': _isAnonymous ? 'Anonymous Donor' : (_nameController.text.trim().isNotEmpty ? _nameController.text.trim() : 'Generous Supporter'),
+        'donor_email': _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : 'supporter@sweezenfoundation.org',
+        'is_anonymous': _isAnonymous,
+        'is_80g_requested': _is80GRequested,
+        'pan_number': _panController.text.trim().isNotEmpty ? _panController.text.trim() : 'ABCDE1234F',
+        'payment_method': _paymentMethod
+      };
+
       final verifyPayload = {
-        'razorpay_order_id': _pendingOrderId ?? 'order_sim_123',
+        'razorpay_order_id': _pendingOrderId ?? 'order_sim_${DateTime.now().millisecondsSinceEpoch}',
         'razorpay_payment_id': paymentId,
         'razorpay_signature': signature,
-        'donation_details': _pendingDonationDetails ?? {}
+        'amount': amountVal,
+        'donor_name': fallbackDetails['donor_name'],
+        'donor_email': fallbackDetails['donor_email'],
+        'pan_number': fallbackDetails['pan_number'],
+        'project_id': _selectedProjectId,
+        'donation_details': _pendingDonationDetails != null && _pendingDonationDetails!.isNotEmpty ? _pendingDonationDetails : fallbackDetails
       };
 
       final result = await ApiService.verifyDonationPayment(verifyPayload);
@@ -352,12 +371,11 @@ class _DonateTabState extends State<DonateTab> {
         setState(() => _isProcessing = false);
 
         if (result['success'] == true) {
-          final amountVal = double.tryParse(_amountController.text) ?? 1000.0;
           showDialog(
             context: context,
             builder: (_) => ReceiptDialog(
               donationDetails: {
-                'receiptId': _pendingDonationDetails?['receiptId'] ?? 'SWZ-RCPT-8891',
+                'receiptId': _pendingDonationDetails?['receiptId'] ?? fallbackDetails['receiptId'],
                 'txnId': result['transaction']?['transaction_id'] ?? paymentId,
                 'amount': amountVal,
                 'donor_name': _isAnonymous ? 'Anonymous Donor' : _nameController.text,

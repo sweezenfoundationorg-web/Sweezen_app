@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     phone VARCHAR(50),
-    role VARCHAR(50) DEFAULT 'Volunteer', -- Volunteer, Donor, Researcher, Beneficiary, Staff, Partner, Admin
+    role VARCHAR(50) DEFAULT 'Volunteer', -- Volunteer, Donor, Researcher, Beneficiary, Staff, Partner, Admin, Finance, Manager, Coordinator
     profile_photo TEXT,
     skills TEXT[],
     interests TEXT[],
@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS users (
     impact_points INT DEFAULT 0,
     badges TEXT[] DEFAULT '{}',
     humanity_card_id VARCHAR(100) UNIQUE,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_suspended BOOLEAN DEFAULT FALSE,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -39,6 +42,10 @@ CREATE TABLE IF NOT EXISTS projects (
     funding_goal NUMERIC(12, 2) DEFAULT 0,
     funding_raised NUMERIC(12, 2) DEFAULT 0,
     funding_utilized NUMERIC(12, 2) DEFAULT 0,
+    budget_approved NUMERIC(12, 2) DEFAULT 0,
+    actual_expenditure NUMERIC(12, 2) DEFAULT 0,
+    reporting_period VARCHAR(100) DEFAULT 'Q3 2026',
+    financial_status VARCHAR(50) DEFAULT 'Approved', -- Draft, Under Review, Approved, Published
     status VARCHAR(50) DEFAULT 'Active',
     image_url TEXT,
     video_url TEXT,
@@ -62,7 +69,8 @@ CREATE TABLE IF NOT EXISTS donations (
     is_80g_requested BOOLEAN DEFAULT TRUE,
     pan_number VARCHAR(20),
     receipt_url TEXT,
-    status VARCHAR(50) DEFAULT 'Success',
+    status VARCHAR(50) DEFAULT 'Success', -- Success, Pending, Failed, Recovered
+    recovery_notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -95,12 +103,51 @@ CREATE TABLE IF NOT EXISTS events (
     status VARCHAR(50) DEFAULT 'Upcoming'
 );
 
-CREATE TABLE IF NOT EXISTS event_registrations (
+CREATE TABLE IF NOT EXISTS health_camps (
     id SERIAL PRIMARY KEY,
-    event_id INT REFERENCES events(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    district VARCHAR(100) NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    date_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    doctor_incharge VARCHAR(255),
+    services_offered TEXT[],
+    capacity INT DEFAULT 150,
+    booked_count INT DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'Scheduled',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS health_camp_bookings (
+    id SERIAL PRIMARY KEY,
+    camp_id INT REFERENCES health_camps(id) ON DELETE CASCADE,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    registered_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    certificate_issued BOOLEAN DEFAULT FALSE
+    beneficiary_name VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    booking_qr TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'Confirmed', -- Confirmed, Attended, Cancelled
+    booked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS documents (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(100) NOT NULL, -- Tax Receipt, Certificate, Audit Report, Identity Proof, Project Report
+    file_url TEXT NOT NULL,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    project_id INT REFERENCES projects(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE SET NULL,
+    user_name VARCHAR(255),
+    user_role VARCHAR(50),
+    action VARCHAR(100) NOT NULL,
+    target_module VARCHAR(100) NOT NULL,
+    details TEXT,
+    ip_address VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS humanity_cards (
@@ -141,3 +188,4 @@ CREATE TABLE IF NOT EXISTS group_messages (
     message TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+

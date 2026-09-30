@@ -405,8 +405,58 @@ class _VolunteerTabState extends State<VolunteerTab> {
                   ],
                 ),
               ),
+              const SizedBox(height: 16),
+
+              // 1.5 Volunteer Digital QR ID Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.cardNavy,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.goldAccent, width: 1.2),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.qr_code_2, color: Colors.black, size: 42),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text('VOLUNTEER DIGITAL ID', style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1)),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade900.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.greenAccent, width: 0.8),
+                                ),
+                                child: const Text('VERIFIED', style: TextStyle(color: Colors.greenAccent, fontSize: 9, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text('ID: VOL-2026-98124 • Exp: 31-DEC-2026', style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                          Text('Status: Active & Valid (Unrevoked)', style: TextStyle(color: Colors.green.shade300, fontSize: 10, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 20),
             ],
+
 
             // 2. Offline Sync Banner
             if (state.offlineSyncQueue.isNotEmpty) ...[

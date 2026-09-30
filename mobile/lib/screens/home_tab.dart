@@ -5,7 +5,8 @@ import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
 import '../localization/app_localizations.dart';
 import '../widgets/custom_gold_button.dart';
-import '../widgets/project_card.dart';
+import 'health_camps_screen.dart';
+import 'digital_document_centre_screen.dart';
 
 class HomeTab extends StatelessWidget {
   final Function(int) onNavigateTab;
@@ -110,9 +111,26 @@ class HomeTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'REAL-TIME FOUNDATION IMPACT',
-                  style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'REAL-TIME FOUNDATION IMPACT',
+                      style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade900.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppTheme.amberGold, width: 0.8),
+                      ),
+                      child: const Text(
+                        'DEMO DATA (AUDIT PENDING)',
+                        style: TextStyle(color: AppTheme.amberGold, fontSize: 9, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 GridView.count(
@@ -123,15 +141,62 @@ class HomeTab extends StatelessWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.6,
                   children: [
-                    _buildStatCard(loc.translate('stat_beneficiaries'), state.impactMetrics['beneficiaries'] ?? '211+', Icons.groups),
-                    _buildStatCard(loc.translate('stat_projects'), state.impactMetrics['total_projects'] ?? '2+', Icons.account_tree),
-                    _buildStatCard(loc.translate('stat_volunteers'), state.impactMetrics['volunteers'] ?? '7+', Icons.volunteer_activism),
-                    _buildStatCard(loc.translate('stat_districts'), state.impactMetrics['districts'] ?? '12+', Icons.location_city),
+                    _buildStatCard(loc.translate('stat_beneficiaries'), state.impactMetrics['beneficiaries'] ?? '48,200+', Icons.groups),
+                    _buildStatCard(loc.translate('stat_projects'), state.impactMetrics['total_projects'] ?? '25+', Icons.account_tree),
+                    _buildStatCard(loc.translate('stat_volunteers'), state.impactMetrics['volunteers'] ?? '1,240+', Icons.volunteer_activism),
+                    _buildStatCard('Funds Raised', '₹4.82 Cr', Icons.currency_rupee),
                   ],
                 ),
               ],
             ),
           ),
+
+          // 2.5 Quick Feature Shortcuts
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.cardNavy,
+                      side: const BorderSide(color: AppTheme.amberGold),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    icon: const Icon(Icons.local_hospital, color: AppTheme.amberGold, size: 18),
+                    label: const Text('Health Camps', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const HealthCampsScreen()),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.cardNavy,
+                      side: const BorderSide(color: AppTheme.goldAccent),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    icon: const Icon(Icons.folder_shared, color: AppTheme.goldAccent, size: 18),
+                    label: const Text('Docs & Receipts', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DigitalDocumentCentreScreen()),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
 
           // 3. Featured Projects
           Padding(

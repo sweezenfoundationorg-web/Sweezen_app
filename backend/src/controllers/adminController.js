@@ -327,3 +327,108 @@ exports.sendPushNotification = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Push notification error' });
   }
 };
+
+// ==========================================
+// 6. AUDIT TRAIL & SYSTEM LOGS
+// ==========================================
+
+exports.getAuditLogs = async (req, res) => {
+  try {
+    const logs = memoryDb.auditLogs || [
+      {
+        id: 'LOG-1001',
+        user_name: 'Super Admin',
+        user_role: 'Super Admin',
+        action: 'FINANCIAL_APPROVAL',
+        target_module: 'Projects',
+        details: 'Approved Q3 2026 expenditure report for Haridwar Health Camp',
+        ip_address: '192.168.1.10',
+        created_at: new Date('2026-09-29T10:00:00Z')
+      },
+      {
+        id: 'LOG-1002',
+        user_name: 'Finance Admin',
+        user_role: 'Finance',
+        action: 'DONATION_RECONCILE',
+        target_module: 'Donations',
+        details: 'Reconciled 14 Razorpay payment callbacks with 80G e-receipts',
+        ip_address: '192.168.1.15',
+        created_at: new Date('2026-09-29T14:30:00Z')
+      }
+    ];
+
+    return res.status(200).json({
+      success: true,
+      count: logs.length,
+      audit_logs: logs
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to fetch audit logs' });
+  }
+};
+
+// ==========================================
+// 7. USER MANAGEMENT & APPROVALS
+// ==========================================
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = memoryDb.users || [];
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      users
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+};
+
+exports.updateUserStatus = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { is_verified, is_suspended, role } = req.body;
+
+    const user = memoryDb.users.find(u => u.id === parseInt(userId) || u.id === userId);
+    if (user) {
+      if (is_verified !== undefined) user.is_verified = is_verified;
+      if (is_suspended !== undefined) user.is_suspended = is_suspended;
+      if (role) user.role = role;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `User status updated successfully`,
+      user
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Failed to update user status' });
+  }
+};
+
+// ==========================================
+// 8. FINANCIAL APPROVAL WORKFLOW
+// ==========================================
+
+exports.approveProjectFinancials = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { budget_approved, actual_expenditure, financial_status } = req.body;
+
+    const proj = memoryDb.projects.find(p => p.id === projectId || p.id === parseInt(projectId));
+    if (proj) {
+      proj.budget_approved = parseFloat(budget_approved || proj.funding_goal);
+      proj.actual_expenditure = parseFloat(actual_expenditure || proj.funding_utilized);
+      proj.financial_status = financial_status || 'Published';
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Project financial metrics approved & published for public transparency audit!`,
+      project: proj
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: 'Financial approval failed' });
+  }
+};
+
