@@ -444,7 +444,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 10000;
     }
 
     .modal-overlay.open { display: flex; }
@@ -514,10 +514,10 @@
       </div>
 
       <div class="role-quick-chips">
-        <div class="role-chip selected" onclick="selectRole('Super Admin', 'admin@sweezenfoundation.org')">👑 Super Admin</div>
-        <div class="role-chip" onclick="selectRole('Finance', 'finance@sweezenfoundation.org')">💰 Finance Lead</div>
-        <div class="role-chip" onclick="selectRole('Programme Manager', 'manager@sweezenfoundation.org')">📊 Prog Manager</div>
-        <div class="role-chip" onclick="selectRole('Volunteer Coordinator', 'coordinator@sweezenfoundation.org')">🤝 Volunteer Lead</div>
+        <div class="role-chip selected" onclick="selectRole('Super Admin', 'admin@sweezenfoundation.org', this)">👑 Super Admin</div>
+        <div class="role-chip" onclick="selectRole('Finance', 'finance@sweezenfoundation.org', this)">💰 Finance Lead</div>
+        <div class="role-chip" onclick="selectRole('Programme Manager', 'manager@sweezenfoundation.org', this)">📊 Prog Manager</div>
+        <div class="role-chip" onclick="selectRole('Volunteer Coordinator', 'coordinator@sweezenfoundation.org', this)">🤝 Volunteer Lead</div>
       </div>
 
       <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
@@ -555,7 +555,7 @@
       <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
         A 6-digit verification code has been dispatched to your authenticated device. Enter code below:
       </p>
-      <input type="text" id="otp-2fa-input" class="form-control" placeholder="123456" style="text-align: center; font-size: 20px; letter-spacing: 6px; font-weight: bold;" value="123456">
+      <input type="text" id="otp-2fa-input" class="form-control" placeholder="123456" style="text-align: center; font-size: 20px; letter-spacing: 6px; font-weight: bold;" value="123456" onkeyup="if(event.key === 'Enter') verifyAdmin2FA()">
       <div style="margin-top: 20px; display: flex; gap: 10px;">
         <button class="btn-outline" style="flex: 1; justify-content: center;" onclick="closeModals()">Cancel</button>
         <button class="btn-gold" style="flex: 1; justify-content: center;" onclick="verifyAdmin2FA()">VERIFY OTP</button>
@@ -919,9 +919,14 @@
     let currentAdminUser = JSON.parse(localStorage.getItem('sweezen_admin_user') || 'null');
 
     // Role preset picker
-    function selectRole(role, email) {
+    function selectRole(role, email, el) {
       document.querySelectorAll('.role-chip').forEach(c => c.classList.remove('selected'));
-      event.target.classList.add('selected');
+      if (el) {
+        el.classList.add('selected');
+      } else if (typeof event !== 'undefined' && event && event.target) {
+        const chip = event.target.closest('.role-chip');
+        if (chip) chip.classList.add('selected');
+      }
       document.getElementById('login-role').value = role;
       document.getElementById('login-email').value = email;
     }
