@@ -156,59 +156,9 @@ class AppStateProvider extends ChangeNotifier {
     );
     _isLoggedIn = false;
 
-    // Load Projects
+    // Load Projects & Events from MongoDB via API
     loadProjects();
-
-    // Default Tasks (Matching Website Data)
-    _assignedTasks = [
-      TaskModel(
-        id: 101,
-        title: 'HealthCare Camp Patient Registration & Assistance',
-        description: 'Assist doctors with patient token distribution, vital recordings, and basic medicine kit dispatch at Haridwar Health Camp.',
-        location: '353 Avas Vikas Colony, Haridwar',
-        requiredSkills: ['Field Work', 'Patient Assistance', 'First Aid'],
-        status: 'Pending',
-        remarks: 'Coordinate with Camp Leader Sheetal on arrival.',
-        geoLat: 29.9600,
-        geoLng: 78.2000,
-      ),
-      TaskModel(
-        id: 102,
-        title: 'Haridwar Riverbank Environment Sanitation Drive',
-        description: 'Lead volunteer groups in plastic waste collection, segregation, and public eco-awareness near riverbank ghats.',
-        location: 'Riverbank Ghats, Haridwar',
-        requiredSkills: ['Environment', 'Community Work'],
-        status: 'In Progress',
-        remarks: 'Safety gloves and collection bags will be provided.',
-        photoUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80',
-        geoLat: 29.9457,
-        geoLng: 78.1642,
-      )
-    ];
-
-    // Default Events (Matching Website Data)
-    _events = [
-      EventModel(
-        id: 201,
-        title: 'Community HealthCare Camp Haridwar',
-        description: 'Free medical checkup camp providing doctor consultations, free medicine distribution, and diagnostic screenings for local families.',
-        category: 'Healthcare',
-        location: '353 Avas Vikas Colony, Haridwar, Uttarakhand',
-        registeredCount: 211,
-        bannerUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80',
-        status: 'Upcoming',
-      ),
-      EventModel(
-        id: 202,
-        title: 'Swachh Haridwar Environment Drive',
-        description: 'Mass public cleanliness drive, plastic waste collection, and riverbank environmental sanitation campaign.',
-        category: 'Environment',
-        location: 'Ghats & Public Parks, Haridwar, Uttarakhand',
-        registeredCount: 100,
-        bannerUrl: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
-        status: 'Upcoming',
-      )
-    ];
+    loadEvents();
   }
 
   void toggleLanguage(String langCode) {

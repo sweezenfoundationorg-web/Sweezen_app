@@ -243,10 +243,18 @@ exports.deleteDonation = async (req, res) => {
 
 exports.getAllTasks = async (req, res) => {
   try {
+    const tasksCol = getCollection('activities');
+    let list = [];
+    if (tasksCol) {
+      list = await tasksCol.find({}).toArray();
+    }
+    if (!list || list.length === 0) {
+      list = memoryDb.tasks;
+    }
     return res.status(200).json({
       success: true,
-      count: memoryDb.tasks.length,
-      tasks: memoryDb.tasks
+      count: list.length,
+      tasks: list
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Failed to fetch tasks' });
@@ -256,6 +264,7 @@ exports.getAllTasks = async (req, res) => {
 exports.assignTaskToVolunteer = async (req, res) => {
   try {
     const { title, description, location, required_skills, assigned_user_id, date_time } = req.body;
+    const tasksCol = getCollection('activities');
 
     const newTask = {
       id: memoryDb.tasks.length ? Math.max(...memoryDb.tasks.map(t => t.id)) + 1 : 101,
@@ -273,6 +282,9 @@ exports.assignTaskToVolunteer = async (req, res) => {
       updated_at: new Date()
     };
 
+    if (tasksCol) {
+      await tasksCol.insertOne(newTask);
+    }
     memoryDb.tasks.push(newTask);
 
     await sendPushToTopic('all_volunteers', {
@@ -290,13 +302,17 @@ exports.assignTaskToVolunteer = async (req, res) => {
 exports.deleteTask = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const index = memoryDb.tasks.findIndex(t => t.id === id);
+    const tasksCol = getCollection('activities');
 
-    if (index === -1) {
-      return res.status(404).json({ success: false, message: 'Task not found' });
+    if (tasksCol) {
+      await tasksCol.deleteOne({ $or: [{ id: id }, { id: String(id) }] });
     }
 
-    memoryDb.tasks.splice(index, 1);
+    const index = memoryDb.tasks.findIndex(t => t.id === id);
+    if (index !== -1) {
+      memoryDb.tasks.splice(index, 1);
+    }
+
     return res.status(200).json({ success: true, message: 'Task deleted' });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Failed to delete task' });
@@ -334,28 +350,25 @@ exports.sendPushNotification = async (req, res) => {
 
 exports.getAuditLogs = async (req, res) => {
   try {
-    const logs = memoryDb.auditLogs || [
-      {
-        id: 'LOG-1001',
-        user_name: 'Super Admin',
-        user_role: 'Super Admin',
-        action: 'FINANCIAL_APPROVAL',
-        target_module: 'Projects',
-        details: 'Approved Q3 2026 expenditure report for Haridwar Health Camp',
-        ip_address: '192.168.1.10',
-        created_at: new Date('2026-09-29T10:00:00Z')
-      },
-      {
-        id: 'LOG-1002',
-        user_name: 'Finance Admin',
-        user_role: 'Finance',
-        action: 'DONATION_RECONCILE',
-        target_module: 'Donations',
-        details: 'Reconciled 14 Razorpay payment callbacks with 80G e-receipts',
-        ip_address: '192.168.1.15',
-        created_at: new Date('2026-09-29T14:30:00Z')
-      }
-    ];
+    const auditCol = getCollection('admin_audit_logs');
+    let logs = [];
+    if (auditCol) {
+      logs = await auditCol.find({}).sort({ created_at: -1 }).limit(100).toArray();
+    }
+    if (!logs || logs.length === 0) {
+      logs = memoryDb.auditLogs || [
+        {
+          id: 'LOG-1001',
+          user_name: 'Super Admin',
+          user_role: 'Super Admin',
+          action: 'FINANCIAL_APPROVAL',
+          target_module: 'Projects',
+          details: 'Approved Q3 2026 expenditure report for Haridwar Health Camp',
+          ip_address: '192.168.1.10',
+          created_at: new Date('2026-09-29T10:00:00Z')
+        }
+      ];
+    }
 
     return res.status(200).json({
       success: true,
@@ -373,11 +386,18 @@ exports.getAuditLogs = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = memoryDb.users || [];
+    const usersCol = getCollection('users');
+    let usersList = [];
+    if (usersCol) {
+      usersList = await usersCol.find({}).sort({ created_at: -1 }).toArray();
+    }
+    if (!usersList || usersList.length === 0) {
+      usersList = memoryDb.users || [];
+    }
     return res.status(200).json({
       success: true,
-      count: users.length,
-      users
+      count: usersList.length,
+      users: usersList
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Failed to fetch users' });
@@ -387,19 +407,31 @@ exports.getAllUsers = async (req, res) => {
 exports.updateUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { is_verified, is_suspended, role } = req.body;
+    const { is_verified, is_suspended, role, status } = req.body;
 
-    const user = memoryDb.users.find(u => u.id === parseInt(userId) || u.id === userId);
+    const usersCol = getCollection('users');
+    const updatePayload = {};
+    if (is_verified !== undefined) updatePayload.is_verified = is_verified;
+    if (is_suspended !== undefined) updatePayload.is_suspended = is_suspended;
+    if (status !== undefined) updatePayload.status = status;
+    if (role) updatePayload.role = role;
+
+    if (usersCol) {
+      await usersCol.updateOne(
+        { $or: [{ id: userId }, { id: parseInt(userId) || -1 }, { email: userId }] },
+        { $set: updatePayload }
+      );
+    }
+
+    const user = memoryDb.users.find(u => u.id === parseInt(userId) || u.id === userId || u.email === userId);
     if (user) {
-      if (is_verified !== undefined) user.is_verified = is_verified;
-      if (is_suspended !== undefined) user.is_suspended = is_suspended;
-      if (role) user.role = role;
+      Object.assign(user, updatePayload);
     }
 
     return res.status(200).json({
       success: true,
       message: `User status updated successfully`,
-      user
+      user: updatePayload
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Failed to update user status' });
@@ -415,20 +447,33 @@ exports.approveProjectFinancials = async (req, res) => {
     const { projectId } = req.params;
     const { budget_approved, actual_expenditure, financial_status } = req.body;
 
+    const projCol = getCollection('projects');
+    const updateObj = {
+      budget_approved: parseFloat(budget_approved || 0),
+      actual_expenditure: parseFloat(actual_expenditure || 0),
+      financial_status: financial_status || 'Published'
+    };
+
+    if (projCol) {
+      await projCol.updateOne(
+        { $or: [{ id: projectId }, { id: parseInt(projectId) || -1 }] },
+        { $set: updateObj }
+      );
+    }
+
     const proj = memoryDb.projects.find(p => p.id === projectId || p.id === parseInt(projectId));
     if (proj) {
-      proj.budget_approved = parseFloat(budget_approved || proj.funding_goal);
-      proj.actual_expenditure = parseFloat(actual_expenditure || proj.funding_utilized);
-      proj.financial_status = financial_status || 'Published';
+      Object.assign(proj, updateObj);
     }
 
     return res.status(200).json({
       success: true,
       message: `Project financial metrics approved & published for public transparency audit!`,
-      project: proj
+      project: updateObj
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: 'Financial approval failed' });
   }
 };
+
 
