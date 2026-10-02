@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "631359600678",
-    "project_id": "sweezen-6f693",
-    "storage_bucket": "sweezen-6f693.firebasestorage.app"
+    "project_number": "536433711964",
+    "project_id": "indraprastha-web",
+    "storage_bucket": "indraprastha-web.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:631359600678:android:faf977d9111375edb84ee7",
+        "mobilesdk_app_id": "1:536433711964:android:a3c68be3304759fbb37f99",
         "android_client_info": {
           "package_name": "com.sweezen.foundation.mobile"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "536433711964-3umvm0u300e7bos1mlrvdqlamqsefvbe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAOTS7fjww4dm5_ghFQfOOOt0xR2JZXsxY"
+          "current_key": "AIzaSyASB5oLNr3M0t9HEKkj2nhzTnAovBmOsfg"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "536433711964-3umvm0u300e7bos1mlrvdqlamqsefvbe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -244,4 +244,46 @@ class ApiService {
     } catch (_) {}
     return {};
   }
+
+  // Firebase Mobile Phone OTP Backend Authentication
+  static Future<Map<String, dynamic>> firebasePhoneLogin({
+    required String phoneNumber,
+    String? idToken,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/auth/firebase-phone-login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'phoneNumber': phoneNumber,
+          'idToken': idToken,
+        }),
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        return jsonDecode(res.body);
+      } else {
+        final body = jsonDecode(res.body);
+        return {'success': false, 'message': body['message'] ?? 'Firebase Phone verification failed on backend'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Network error: $e'};
+    }
+  }
+
+  // Register FCM Device Token on Backend
+  static Future<void> registerFcmToken(String userId, String fcmToken) async {
+    try {
+      await http.post(
+        Uri.parse('$baseUrl/notifications/register-token'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'userId': userId,
+          'fcmToken': fcmToken,
+        }),
+      );
+    } catch (e) {
+      print('FCM Token registration error: $e');
+    }
+  }
 }
+

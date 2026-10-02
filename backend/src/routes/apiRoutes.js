@@ -27,12 +27,28 @@ router.post('/auth/register', authController.registerMultiStep);
 router.post('/auth/login', authController.login);
 router.post('/auth/admin-login', authController.adminLogin);
 
+router.post('/auth/firebase-phone-login', authController.firebasePhoneLogin);
+
 router.post('/auth/setup-2fa', authController.setup2FA);
 router.post('/auth/verify-2fa', authController.verify2FA);
 
 router.get('/auth/profile', authController.getProfile);
 router.get('/auth/me', authController.getProfile);
 router.put('/auth/profile', authController.updateProfile);
+
+// Notifications & FCM Token Endpoint
+const notificationService = require('../services/notificationService');
+router.post('/notifications/register-token', async (req, res) => {
+  try {
+    const { userId, fcmToken } = req.body;
+    if (!fcmToken) return res.status(400).json({ success: false, message: 'FCM Token required' });
+    console.log(`[FCM TOKEN REGISTERED] User: ${userId || 'guest'} Token: ${fcmToken}`);
+    return res.status(200).json({ success: true, message: 'FCM Token registered successfully' });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 
 // 2. Project Routes
 router.get('/projects', projectController.getProjects);

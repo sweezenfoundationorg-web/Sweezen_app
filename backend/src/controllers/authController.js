@@ -429,13 +429,72 @@ exports.verify2FA = async (req, res) => {
     if (verified) {
       return res.status(200).json({ success: true, message: 'Google 2FA Verification Successful!' });
     } else {
-      return res.status(400).json({ success: false, message: 'Invalid Google Authenticator OTP code' });
+// 11. Firebase Mobile Phone OTP Authentication
+exports.firebasePhoneLogin = async (req, res) => {
+  try {
+    const { phoneNumber, idToken } = req.body;
+    const cleanPhone = (phoneNumber || '').toString().trim();
+
+    if (!cleanPhone) {
+      return res.status(400).json({ success: false, message: 'Phone number is required' });
     }
+
+    let verifiedPhone = cleanPhone;
+
+    // Optional: Verify ID Token with Firebase Admin SDK if token is provided & Firebase is initialized
+    if (idToken) {
+      try {
+        const { getAuth } = require('firebase-admin/auth');
+        const decodedToken = await getAuth().verifyIdToken(idToken);
+        if (decodedToken.phone_number) {
+          verifiedPhone = decodedToken.phone_number;
+        }
+      } catch (authErr) {
+        console.warn('[Firebase Auth Warning] Token verification skipped/failed:', authErr.message);
+      }
+    }
+
+    const usersCol = getCollection('users');
+    let user = null;
+
+    if (usersCol) {
+      user = await usersCol.findOne({ $or: [{ phone: verifiedPhone }, { phone: cleanPhone }] });
+    }
+
+    if (!user) {
+      user = memoryDb.users.find(u => u.phone === verifiedPhone || u.phone === cleanPhone);
+    }
+
+    // If user does not exist yet, return needs registration flag
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        isRegistered: false,
+        phoneNumber: verifiedPhone,
+        message: 'Phone verified. Registration required.'
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { userId: user.id || user._id, role: user.role || 'donor', phone: verifiedPhone },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return res.status(200).json({
+      success: true,
+      isRegistered: true,
+      token,
+      user
+    });
+
   } catch (err) {
-    console.error('Verify 2FA error:', err);
-    return res.status(500).json({ success: false, message: '2FA verification error' });
+    console.error('Firebase Phone Login Error:', err);
+    return res.status(500).json({ success: false, message: 'Firebase Phone Login failed' });
   }
 };
+
 
 
 

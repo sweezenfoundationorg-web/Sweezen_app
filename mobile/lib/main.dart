@@ -4,8 +4,18 @@ import 'providers/app_state_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'services/fcm_service.dart';
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+    await FCMService.initFCM();
+  } catch (e) {
+    debugPrint('[Firebase Core] Note: Firebase options not configured yet or missing config file: $e');
+  }
+
   runApp(
     MultiProvider(
       providers: [
@@ -15,6 +25,7 @@ void main() {
     ),
   );
 }
+
 
 class SweezenApp extends StatelessWidget {
   const SweezenApp({Key? key}) : super(key: key);
