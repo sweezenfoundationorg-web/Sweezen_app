@@ -56,6 +56,7 @@ class _ProfileTabState extends State<ProfileTab> {
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppStateProvider>(context);
+    final loc = AppLocalizations(state.currentLanguage);
     final user = state.currentUser;
 
     if (user == null) {
