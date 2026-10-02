@@ -31,6 +31,8 @@ class AppStateProvider extends ChangeNotifier {
     'funds_raised': '₹14,311'
   };
 
+  bool _onboardingCompleted = false;
+
   // Accessibility Settings
   double _textScaleFactor = 1.0;
   bool _isHighContrast = false;
@@ -133,6 +135,9 @@ class AppStateProvider extends ChangeNotifier {
   UserModel? get currentUser => _currentUser;
   bool get isLoggedIn => _isLoggedIn;
   bool get onboardingCompleted => _onboardingCompleted;
+
+  bool get isAppLockEnabled => _isAppLockEnabled;
+  bool get isAppUnlocked => _isAppUnlocked;
 
   double get textScaleFactor => _textScaleFactor;
   bool get isHighContrast => _isHighContrast;

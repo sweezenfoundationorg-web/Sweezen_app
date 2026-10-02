@@ -84,7 +84,7 @@ class _HospitalEducationPortalScreenState extends State<HospitalEducationPortalS
               onPressed: () {
                 if (nameController.text.isNotEmpty && needController.text.isNotEmpty) {
                   final newRef = {
-                    'id': 'REF-${Math.floor(1000 + (nameController.text.length * 99))}',
+                    'id': 'REF-${1000 + (nameController.text.length * 99)}',
                     'partnerName': partnerName,
                     'type': refType,
                     'patientOrStudentName': nameController.text,
