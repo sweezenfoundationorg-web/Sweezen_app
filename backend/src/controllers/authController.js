@@ -312,7 +312,7 @@ exports.adminLogin = async (req, res) => {
     if (req.body.requires_2fa) {
       const cleanOtp = (otp_code || '').toString().trim();
       let isValid2FA = (cleanOtp === '123456' || cleanOtp === '990123');
-      
+
       // Also verify via Speakeasy Google Authenticator secret if set
       if (!isValid2FA && cleanOtp) {
         const adminSecret = process.env.ADMIN_2FA_SECRET || 'JBSWY3DPEHPK3PXP';
@@ -429,6 +429,14 @@ exports.verify2FA = async (req, res) => {
     if (verified) {
       return res.status(200).json({ success: true, message: 'Google 2FA Verification Successful!' });
     } else {
+      return res.status(400).json({ success: false, message: 'Invalid 2FA Verification Code' });
+    }
+  } catch (err) {
+    console.error('Verify 2FA error:', err);
+    return res.status(500).json({ success: false, message: '2FA verification failed' });
+  }
+};
+
 // 11. Firebase Mobile Phone OTP Authentication
 exports.firebasePhoneLogin = async (req, res) => {
   try {
@@ -494,7 +502,5 @@ exports.firebasePhoneLogin = async (req, res) => {
     return res.status(500).json({ success: false, message: 'Firebase Phone Login failed' });
   }
 };
-
-
 
 
