@@ -32,6 +32,10 @@ class AppLocalizations {
       'role_donor': 'Donor',
       'role_beneficiary': 'Beneficiary',
       'select_language': 'Select App Language (12 Languages)',
+      'csr_dashboard': 'CSR Partner Dashboard',
+      'hospital_education_portal': 'Hospital & Education Portals',
+      'ai_analytics': 'AI-assisted Analytics',
+      'accessibility_settings': 'Accessibility & Font Scale',
     },
     'hi': {
       'app_title': 'स्वीजन फाउंडेशन',
@@ -61,6 +65,10 @@ class AppLocalizations {
       'role_donor': 'दाता',
       'role_beneficiary': 'लाभार्थी',
       'select_language': 'ऐप भाषा चुनें (12 भाषाएं)',
+      'csr_dashboard': 'सीएसआर पार्टनर डैशबोर्ड',
+      'hospital_education_portal': 'अस्पताल एवं शिक्षा पोर्टल',
+      'ai_analytics': 'एआई-सहायक विश्लेषिकी',
+      'accessibility_settings': 'सुगम्यता एवं फ़ॉन्ट आकार',
     },
     'bn': {
       'app_title': 'সুইজেন ফাউন্ডেশন',

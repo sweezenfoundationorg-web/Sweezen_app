@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
+import 'accessibility_dialog.dart';
 
 class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -151,6 +152,15 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
+        // Accessibility Quick Toggle Button
+        IconButton(
+          tooltip: 'Accessibility & Font Scale',
+          icon: const Icon(Icons.accessibility_new, color: AppTheme.amberGold, size: 22),
+          onPressed: () {
+            AccessibilityDialog.show(context);
+          },
+        ),
+
         // 12-Language Selector Button in Header
         Container(
           margin: const EdgeInsets.only(right: 6),

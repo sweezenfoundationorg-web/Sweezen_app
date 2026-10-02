@@ -112,8 +112,31 @@ router.delete('/admin/tasks/:id', adminController.deleteTask);
 // Audit Trail & Logs
 router.get('/admin/audit-logs', adminController.getAuditLogs);
 
-// Push Notifications
-router.post('/admin/send-push', adminController.sendPushNotification);
+// 12. CSR Partner Dashboard Routes
+const csrController = require('../controllers/csrController');
+router.get('/csr/proposals', csrController.getCsrProposals);
+router.post('/csr/proposals', csrController.submitCsrProposal);
+router.get('/csr/budgets', csrController.getCsrBudgets);
+router.get('/csr/milestones', csrController.getCsrMilestones);
+router.get('/csr/utilization', csrController.getCsrUtilizationReports);
+
+// 13. Hospital & Education Portals Routes
+const portalController = require('../controllers/portalController');
+router.get('/portals/partners', portalController.getPartners);
+router.post('/portals/partners/register', portalController.registerPartner);
+router.get('/portals/referrals', portalController.getReferrals);
+router.post('/portals/referrals', portalController.createReferral);
+router.get('/portals/camps', portalController.getCampSchedules);
+router.post('/portals/camps', portalController.createCampSchedule);
+router.get('/portals/student-progress', portalController.getStudentProgress);
+router.post('/portals/student-progress', portalController.addStudentProgress);
+
+// 14. AI-assisted Analytics Routes
+const aiAnalyticsController = require('../controllers/aiAnalyticsController');
+router.get('/analytics/report-summaries', aiAnalyticsController.getReportSummaries);
+router.get('/analytics/anomalies', aiAnalyticsController.getDataAnomalies);
+router.get('/analytics/draft-impact-reports', aiAnalyticsController.getDraftImpactReports);
+router.post('/analytics/approve-report', aiAnalyticsController.approveDraftImpactReport);
 
 module.exports = router;
 

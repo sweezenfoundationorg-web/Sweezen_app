@@ -303,7 +303,102 @@ function initSeedData() {
     }
   ];
 
-  console.log('[SEED] In-memory seed data loaded with official sweezenfoundation.org website data.');
+  // 6. CSR Partner Proposals, Budgets, Milestones & Utilization Reports
+  memoryDb.csrProposals = [
+    {
+      id: 'CSR-2026-001',
+      partnerName: 'Tata Clean Earth Foundation',
+      projectTitle: 'Haridwar Rural Clean Water & Health Infrastructure',
+      budgetProposed: 5000000,
+      budgetApproved: 4500000,
+      status: 'Approved',
+      submittedDate: '2026-01-15',
+      approvalDate: '2026-02-01',
+      milestones: [
+        { phase: 'Phase 1', title: 'Water Testing & Site Setup', status: 'Completed', percentage: 100 },
+        { phase: 'Phase 2', title: 'Filter Installation & Camp Deployment', status: 'In Progress', percentage: 75 },
+        { phase: 'Phase 3', title: 'Impact Evaluation & Audit', status: 'Pending', percentage: 0 }
+      ],
+      utilization: [
+        { category: 'Medical & Filtration Equipment', allocated: 2000000, spent: 1850000 },
+        { category: 'Field Operations & Staffing', allocated: 1500000, spent: 1200000 },
+        { category: 'Logistics & Community Outreach', allocated: 1000000, spent: 750000 }
+      ]
+    },
+    {
+      id: 'CSR-2026-002',
+      partnerName: 'Infosys Foundation',
+      projectTitle: 'Digital Education & Health Monitoring for Tribal Schools',
+      budgetProposed: 3200000,
+      budgetApproved: 3200000,
+      status: 'Under Review',
+      submittedDate: '2026-03-01',
+      approvalDate: null,
+      milestones: [
+        { phase: 'Phase 1', title: 'School Onboarding & Tab Distribution', status: 'In Progress', percentage: 40 },
+        { phase: 'Phase 2', title: 'Teacher Training & Health Tracker Setup', status: 'Pending', percentage: 0 }
+      ],
+      utilization: [
+        { category: 'Hardware & Educational Tablets', allocated: 1800000, spent: 900000 },
+        { category: 'Connectivity & Cloud Software', allocated: 800000, spent: 300000 },
+        { category: 'Trainer Stipends', allocated: 600000, spent: 150000 }
+      ]
+    }
+  ];
+
+  // 7. Hospital & Education Portals (Partners, Referrals, Camps, Student Progress)
+  memoryDb.portalPartners = [
+    { id: 1, name: 'AIIMS Rishikesh Healthcare Wing', type: 'Hospital', location: 'Rishikesh', status: 'Verified', contactPerson: 'Dr. A. Sharma', phone: '+91-9812345678' },
+    { id: 2, name: 'Doona Super Speciality Hospital', type: 'Hospital', location: 'Dehradun', status: 'Verified', contactPerson: 'Dr. R. Verma', phone: '+91-9876512345' },
+    { id: 3, name: 'Sweezen Model Vidya Mandir', type: 'Education Institution', location: 'Haridwar', status: 'Verified', contactPerson: 'Mrs. S. Gupta', phone: '+91-9834567890' }
+  ];
+
+  memoryDb.portalReferrals = [
+    { id: 'REF-8801', partnerName: 'AIIMS Rishikesh', type: 'Medical Surgery', patientOrStudentName: 'Ramesh Kumar (Age 9)', diagnosisOrNeed: 'Pediatric Cardiac Surgery Grant', status: 'Approved', urgency: 'High', date: '2026-03-10' },
+    { id: 'REF-8802', partnerName: 'Sweezen Model Vidya Mandir', type: 'Education Scholarship', patientOrStudentName: 'Pooja Devi (Class 8)', diagnosisOrNeed: 'Higher Secondary Kit & Tuition Support', status: 'Under Review', urgency: 'Medium', date: '2026-03-18' },
+    { id: 'REF-8803', partnerName: 'Doona Hospital', type: 'Eye Care & Cataract', patientOrStudentName: 'Sohan Lal (Age 64)', diagnosisOrNeed: 'Free Cataract Surgery & Glasses', status: 'Completed', urgency: 'Medium', date: '2026-03-22' }
+  ];
+
+  memoryDb.portalCamps = [
+    { id: 'CAMP-101', title: 'Free Mega Eye & Health Camp', facility: 'AIIMS Rishikesh Outreach Team', location: 'Community Center, Haridwar', date: '2026-10-15', time: '09:00 AM - 04:00 PM', capacity: 300, registeredCount: 184, status: 'Upcoming' },
+    { id: 'CAMP-102', title: 'Child Nutrition & Literacy Drive', facility: 'Sweezen Model Vidya Mandir', location: 'Sector 4 School Campus, Haridwar', date: '2026-10-22', time: '10:00 AM - 02:00 PM', capacity: 150, registeredCount: 112, status: 'Upcoming' }
+  ];
+
+  memoryDb.portalStudentProgress = [
+    { id: 'STU-901', name: 'Aarav Sharma', grade: 'Class 7', school: 'Sweezen Model Vidya Mandir', attendance: '96%', academicScore: '88% (Grade A)', healthScore: 'Good (BMI Normal)', kitStatus: 'Distributed March 2026' },
+    { id: 'STU-902', name: 'Priya Joshi', grade: 'Class 9', school: 'Haridwar Girls High School', attendance: '92%', academicScore: '91% (Grade A+)', healthScore: 'Anemia Screened - Meds Provided', kitStatus: 'Distributed Feb 2026' }
+  ];
+
+  // 8. AI-assisted Analytics (Summaries, Data Anomalies, Draft Impact Reports with Human Approval)
+  memoryDb.aiAnalytics = {
+    summaries: [
+      { id: 1, topic: 'Q1 2026 Health Operations Summary', summaryText: 'AI analysis of 211 health camp consultations indicates a 94.2% patient satisfaction rate. Primary remedies distributed included oral rehydration, vitamins, and eye drops. Cost per beneficiary was ₹67.8, representing a 14% improvement in budget efficiency.' },
+      { id: 2, topic: 'CSR Utilization ROI', summaryText: 'Total CSR fund utilization reached 78.4% across active programs. Zero unverified expenditure items were detected. Projected beneficiary reach for upcoming Q4 camps is 1,200 individuals.' }
+    ],
+    anomalies: [
+      { id: 'ANO-101', severity: 'Medium', area: 'Budget Variance', description: 'Logistics expenses in Haridwar Environmental Camp spiked +18% above historical average.', status: 'Flagged for Review', timestamp: '2026-03-25T14:30:00Z' },
+      { id: 'ANO-102', severity: 'Low', area: 'Unverified QR Scan', description: 'Duplicate Humanity Card scan detected within 30 seconds at Camp-101.', status: 'Resolved - System Auto-Deduplicated', timestamp: '2026-03-26T09:12:00Z' }
+    ],
+    draftReports: [
+      {
+        id: 'DRAFT-REP-2026-01',
+        title: 'Sweezen Foundation Annual Impact & CSR Governance Report 2026',
+        author: 'Ask Sweezen AI Analytics Engine v3.4',
+        executiveSummary: 'This draft report evaluates 2 active programs across Haridwar and Uttarakhand, summarizing financial utilization of ₹14,311 raised, 211+ direct healthcare beneficiaries, and 100% digital 80G tax receipt compliance.',
+        highlights: [
+          'Direct beneficiary outreach expanded by 34% quarter-on-quarter.',
+          '100% of field volunteer task reports geo-verified with real-time GPS coordinates.',
+          'Zero compliance deviations across 80G tax exemption certificates.'
+        ],
+        isHumanApproved: false,
+        approvedBy: null,
+        approvalDate: null,
+        status: 'Pending Human Approval'
+      }
+    ]
+  };
+
+  console.log('[SEED] In-memory seed data loaded with official sweezenfoundation.org website data & CSR, Portal, AI modules.');
 }
 
 module.exports = { initSeedData };

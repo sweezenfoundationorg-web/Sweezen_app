@@ -21,11 +21,23 @@ class SweezenApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sweezen Foundation',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      home: const SplashScreen(),
+    return Consumer<AppStateProvider>(
+      builder: (context, appState, child) {
+        return MaterialApp(
+          title: 'Sweezen Foundation',
+          debugShowCheckedModeBanner: false,
+          theme: appState.isHighContrast ? AppTheme.highContrastTheme : AppTheme.darkTheme,
+          builder: (context, childWidget) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(appState.textScaleFactor),
+              ),
+              child: childWidget!,
+            );
+          },
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

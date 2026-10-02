@@ -8,6 +8,9 @@ import '../widgets/custom_gold_button.dart';
 import '../widgets/project_card.dart';
 import 'health_camps_screen.dart';
 import 'digital_document_centre_screen.dart';
+import 'csr_partner_dashboard_screen.dart';
+import 'hospital_education_portal_screen.dart';
+import 'ai_analytics_screen.dart';
 
 class HomeTab extends StatelessWidget {
   final Function(int) onNavigateTab;
@@ -193,6 +196,99 @@ class HomeTab extends StatelessWidget {
                       );
                     },
                   ),
+                ),
+              ],
+            ),
+          ),
+
+          // 2.6 Dedicated Enterprise & Portal Modules Grid
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'SPECIALIZED PORTALS & ANALYTICS',
+                  style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const CsrPartnerDashboardScreen()));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.cardNavy,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppTheme.amberGold.withValues(alpha: 0.5)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Icon(Icons.corporate_fare, color: AppTheme.amberGold, size: 22),
+                              SizedBox(height: 6),
+                              Text('CSR Partner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('Proposals & Budgets', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const HospitalEducationPortalScreen()));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.cardNavy,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.lightBlueAccent.withValues(alpha: 0.5)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Icon(Icons.local_hospital, color: Colors.lightBlueAccent, size: 22),
+                              SizedBox(height: 6),
+                              Text('Hospital/School', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('Referrals & Camps', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAnalyticsScreen()));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.cardNavy,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.purpleAccent.withValues(alpha: 0.5)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 22),
+                              SizedBox(height: 6),
+                              Text('AI Analytics', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text('Summaries & Anomalies', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

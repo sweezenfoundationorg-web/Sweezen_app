@@ -16,6 +16,10 @@ import 'impact_map_screen.dart';
 import 'communication_screen.dart';
 import 'reports_screen.dart';
 import 'login_screen.dart';
+import 'csr_partner_dashboard_screen.dart';
+import 'hospital_education_portal_screen.dart';
+import 'ai_analytics_screen.dart';
+import '../widgets/accessibility_dialog.dart';
 
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({Key? key}) : super(key: key);
@@ -85,32 +89,56 @@ class _MainShellScreenState extends State<MainShellScreen> {
             ),
 
             // Drawer Items
-            _buildDrawerItem(Icons.event, 'Events & Conclaves', () {
-              Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen()));
-            }),
-            _buildDrawerItem(Icons.qr_code_2, loc.translate('humanity_card'), () {
-              Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const HumanityCardScreen()));
-            }),
-            _buildDrawerItem(Icons.map, 'Impact Map & Transparency', () {
-              Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactMapScreen()));
-            }),
-            _buildDrawerItem(Icons.campaign, 'Communication Center', () {
-              Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunicationScreen()));
-            }),
-            _buildDrawerItem(Icons.picture_as_pdf, 'Reports & Media', () {
-              Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
-            }),
-            const Divider(color: Colors.white12),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildDrawerItem(Icons.corporate_fare, loc.translate('csr_dashboard'), () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CsrPartnerDashboardScreen()));
+                  }, isGold: true),
+                  _buildDrawerItem(Icons.local_hospital, loc.translate('hospital_education_portal'), () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const HospitalEducationPortalScreen()));
+                  }, isGold: true),
+                  _buildDrawerItem(Icons.auto_awesome, loc.translate('ai_analytics'), () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAnalyticsScreen()));
+                  }, isGold: true),
+                  _buildDrawerItem(Icons.accessibility_new, loc.translate('accessibility_settings'), () {
+                    Navigator.pop(context);
+                    AccessibilityDialog.show(context);
+                  }),
+                  const Divider(color: Colors.white12),
+                  _buildDrawerItem(Icons.event, 'Events & Conclaves', () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen()));
+                  }),
+                  _buildDrawerItem(Icons.qr_code_2, loc.translate('humanity_card'), () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const HumanityCardScreen()));
+                  }),
+                  _buildDrawerItem(Icons.map, 'Impact Map & Transparency', () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactMapScreen()));
+                  }),
+                  _buildDrawerItem(Icons.campaign, 'Communication Center', () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunicationScreen()));
+                  }),
+                  _buildDrawerItem(Icons.picture_as_pdf, 'Reports & Media', () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
+                  }),
+                  const Divider(color: Colors.white12),
 
-            _buildDrawerItem(Icons.smart_toy, loc.translate('ask_sweezen'), () {
-              Navigator.pop(context);
-              _openAiChatbot();
-            }, isGold: true),
+                  _buildDrawerItem(Icons.smart_toy, loc.translate('ask_sweezen'), () {
+                    Navigator.pop(context);
+                    _openAiChatbot();
+                  }, isGold: true),
+                ],
+              ),
+            ),
 
             const Spacer(),
             _buildDrawerItem(Icons.logout, 'Logout Account', () {

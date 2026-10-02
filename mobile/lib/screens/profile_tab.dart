@@ -5,7 +5,11 @@ import '../providers/app_state_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/document_upload_modal.dart';
+import '../widgets/accessibility_dialog.dart';
 import 'login_screen.dart';
+import 'csr_partner_dashboard_screen.dart';
+import 'hospital_education_portal_screen.dart';
+import 'ai_analytics_screen.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({Key? key}) : super(key: key);
@@ -184,6 +188,69 @@ class _ProfileTabState extends State<ProfileTab> {
                 subtitle: const Text('Bind 2FA TOTP QR code for account login', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
                 onTap: () => _showGoogle2FASetupModal(context, user.email),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            _buildSectionHeader('ACCESSIBILITY & ENTERPRISE PORTALS'),
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.amberGold.withValues(alpha: 0.3)),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.accessibility_new, color: AppTheme.amberGold, size: 22),
+                title: const Text('Accessibility & Text Scaling', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Adjust text size scale, contrast & screen reader options', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
+                onTap: () => AccessibilityDialog.show(context),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.2)),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.corporate_fare, color: AppTheme.goldAccent, size: 22),
+                title: const Text('CSR Partner Dashboard', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Proposals, approved budgets, milestones & utilization', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CsrPartnerDashboardScreen())),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.2)),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.local_hospital, color: Colors.lightBlueAccent, size: 22),
+                title: const Text('Hospital & Education Portals', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Partner registrations, referrals, camps & student progress', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HospitalEducationPortalScreen())),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.cardNavy,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.2)),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 22),
+                title: const Text('AI-assisted Analytics', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Report summaries, anomalies & draft impact approval', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAnalyticsScreen())),
               ),
             ),
             const SizedBox(height: 12),
