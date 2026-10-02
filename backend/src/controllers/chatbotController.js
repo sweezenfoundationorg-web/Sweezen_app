@@ -1,61 +1,182 @@
+/**
+ * Sweezen Foundation AI Assistant Controller
+ * Supports 12 Indian & International Languages, 80G Tax Info, Healthcare, Education, Volunteering, Smart ID & Live Escalation.
+ * Includes Safety Guardrails against unsupported medical/legal claims.
+ */
+
+const SAFETY_DISCLAIMERS = {
+  en: "\n\n⚠️ Disclaimer: Sweezen AI provides general informational guidance. For medical emergencies, dial 108. For formal tax filings, consult a certified CA.",
+  hi: "\n\n⚠️ सूचना: स्वीजन AI केवल सामान्य जानकारी प्रदान करता है। आपातकालीन चिकित्सा स्थिति के लिए 108 पर कॉल करें।",
+  bn: "\n\n⚠️ তথ্য: সুইজেন AI সাধারণ তথ্য প্রদান করে। জরুরি চিকিৎসার জন্য ১০৮ ডায়াল করুন।",
+  pa: "\n\n⚠️ ਸੁਚਨਾ: ਸਵੀਜ਼ਨ AI ਆਮ ਜਾਣਕਾਰੀ ਪ੍ਰਦਾਨ ਕਰਦਾ ਹੈ। ਮੈਡੀਕਲ ਐਮਰਜੈਂਸੀ ਲਈ 108 'ਤੇ ਕਾਲ ਕਰੋ।",
+  mr: "\n\n⚠️ सूचना: स्वीजन AI केवळ सामान्य माहिती प्रदान करते. वैद्यकीय आणीबाणीसाठी 108 वर कॉल करा.",
+  gu: "\n\n⚠️ સૂચના: સ્વીઝન AI માત્ર સામાન્ય માહિતી આપે છે. તબીબી કટોકટી માટે 108 ડાયલ કરો.",
+  ta: "\n\n⚠️ அறிவிப்பு: ஸ்வீஸன் AI பொதுவான தகவல்களை மட்டுமே வழங்குகிறது. மருத்துவ அவசரத்திற்கு 108 ஐ அழைக்கவும்.",
+  te: "\n\n⚠️ గమనిక: స్వీజెన్ AI సాధారణ సమాచారాన్ని మాత్రమే అందిస్తుంది. అత్యవసర వైద్యం కోసం 108 కు కాల్ చేయండి.",
+  kn: "\n\n⚠️ ಸೂಚನೆ: ಸ್ವೀಜನ್ AI ಸಾಮಾನ್ಯ ಮಾಹಿತಿಯನ್ನು ಮಾತ್ರ ನೀಡುತ್ತದೆ. ತುರ್ತು ವೈದ್ಯಕೀಯ ಸೇವೆಗೆ 108 ಗೆ ಕರೆ ಮಾಡಿ.",
+  ml: "\n\n⚠️ ശ്രദ്ധിക്കുക: സ്വീസൻ AI പൊതുവിവരങ്ങൾ നൽകുന്നു. അടിയന്തിര വൈദ്യസഹായത്തിന് 108 വിളിക്കുക.",
+  or: "\n\n⚠️ ସୂଚନା: ସ୍ୱୀଜେନ୍ AI ସାଧାରଣ ତଥ୍ୟ ପ୍ରଦାନ କରେ। ଜରୁରୀ ସ୍ୱାସ୍ଥ୍ୟ ସେବା ପାଇଁ ୧୦୮ କୁ କଲ୍ କରନ୍ତୁ।",
+  ur: "\n\n⚠️ نوٹس: سویزن AI صرف عام معلومات فراہم کرتا ہے۔ طبی ایمرجنسی کے لیے 108 پر کال کریں۔"
+};
+
+const KNOWLEDGE_RESPONSES = {
+  tax: {
+    en: "All donations to Sweezen Foundation are eligible for 50% tax exemption under Section 80G of the Income Tax Act (Approval #80G/2026/SWZ). An instant downloadable 80G e-receipt with QR verification is generated right after donation.",
+    hi: "स्वीजन फाउंडेशन को दिए गए सभी दान आयकर अधिनियम की धारा 80G के तहत 50% कर छूट के लिए पात्र हैं (अनुमोदन संख्या #80G/2026/SWZ)। दान के तुरंत बाद QR सत्यापित 80G ई-रसीद डाउनलोड की जा सकती है।",
+    bn: "সুইজেন ফাউন্ডেশনে প্রদত্ত সমস্ত অনুদান আয়কর আইনের ৮০জি ধারার অধীনে ৫০% কর ছাড়ের জন্য যোগ্য। অনুদানের সাথে সাথেই ই-রসিদ ডাউনলোড করা যাবে।",
+    pa: "ਸਵੀਜ਼ਨ ਫਾਊਂਡੇਸ਼ਨ ਨੂੰ ਦਿੱਤੇ ਗਏ ਸਾਰੇ ਦਾਨ ਆਮਦਨ ਕਰ ਐਕਟ ਦੀ ਧਾਰਾ 80G ਦੇ ਤਹਿਤ 50% ਟੈਕਸ ਛੋਟ ਲਈ ਯੋਗ ਹਨ। ਦਾਨ ਤੋਂ ਤੁਰੰਤ ਬਾਅਦ 80G ਈ-ਰਸੀਦ ਮਿਲਦੀ ਹੈ।",
+    mr: "स्वीजन फाउंडेशनला दिलेली सर्व देणगी आयकर कायद्याच्या कलम 80G अंतर्गत 50% कर सवलतीसाठी पात्र आहे. देणगीनंतर लगेचच 80G ई-पावती उपलब्ध होते.",
+    gu: "સ્વીઝન ફાઉન્ડેશનને આપેલ તમામ દાન આવકવેરા કાયદાની કલમ 80G હેઠળ 50% કર મુક્તિ માટે પાત્ર છે. દાન પછી તરત જ 80G ઈ-રસીદ ડાઉનલોડ કરી શકાય છે.",
+    ta: "ஸ்வீஸன் அறக்கட்டளைக்கு வழங்கப்படும் அனைத்து நன்கொடைகளும் வருமான வரிச் சட்டம் பிரிவு 80G இன் கீழ் 50% வரி விலக்கு பெறத் தகுதியுடையவை.",
+    te: "స్వీజెన్ ఫౌండేషన్‌కు చేసే అన్ని విరాళాలు ఆదాయపు పన్ను చట్టం సెక్షన్ 80G కింద 50% పన్ను మినహాయింపుకు అర్హత కలిగి ఉంటాయి.",
+    kn: "ಸ್ವೀಜನ್ ಫೌಂಡೇಶನ್‌ಗೆ ನೀಡಲಾಗುವ ಎಲ್ಲಾ ದೇಣಿಗೆಗಳು ಆದಾಯ ತೆರಿಗೆ ಕಾಯ್ದೆಯ ಸೆಕ್ಷನ್ 80G ಅಡಿಯಲ್ಲಿ 50% ತೆರಿಗೆ ವಿನಾಯಿತಿಗೆ ಅರ್ಹವಾಗಿವೆ.",
+    ml: "സ്വീസൻ ഫൗണ്ടേഷന് നൽകുന്ന എല്ലാ സംഭാവനകൾക്കും ആദായനികുതി നിയമത്തിലെ 80G വകുപ്പ് പ്രകാരം 50% നികുതി ഇളവിന് അർഹതയുണ്ട്.",
+    or: "ସ୍ୱୀଜେନ୍ ଫାଉଣ୍ଡେସନ୍‌କୁ ଦିଆଯାଇଥିବା ସମସ୍ତ ଦାନ ଆୟକର ଆଇନର ଧାରା 80G ଅଧୀନରେ 50% ଟିକସ ଛାଡ ପାଇଁ ଯୋଗ୍ୟ।",
+    ur: "سویزن فاؤنڈیشن کو دی جانے والی تمام عطیات انکم ٹیکس ایکٹ کی دفعہ 80G کے تحت 50% ٹیکس چھوٹ کی اہل ہیں۔"
+  },
+  healthcare: {
+    en: "Sweezen Foundation organizes free Healthcare & Medical Checkup Camps providing doctor consultations, free medicine distribution, diagnostic screenings, and emergency medical assistance across rural & urban communities.",
+    hi: "स्वीजन फाउंडेशन मुफ्त स्वास्थ्य शिविरों का आयोजन करता है, जिसमें अनुभवी डॉक्टरों का परामर्श, मुफ्त दवा वितरण, रक्त जांच और प्राथमिक उपचार सेवाएं प्रदान की जाती हैं।",
+    bn: "সুইজেন ফাউন্ডেশন বিনামূল্যে স্বাস্থ্য পরীক্ষা শিবিরের আয়োজন করে, যেখানে ডাক্তারদের পরামর্শ, বিনামূল্যে ওষুধ বিতরণ এবং স্বাস্থ্য পরীক্ষা করা হয়।",
+    pa: "ਸਵੀਜ਼ਨ ਫਾਊਂਡੇਸ਼ਨ ਮੁਫ਼ਤ ਮੈਡੀਕਲ ਕੈਂਪ ਆਯੋਜਿਤ ਕਰਦੀ ਹੈ ਜਿਸ ਵਿੱਚ ਡਾਕਟਰੀ ਸਲਾਹ, ਮੁਫ਼ਤ ਦਵਾਈਆਂ ਅਤੇ ਸਿਹਤ ਜਾਂਚ ਸ਼ਾਮਲ ਹੈ।",
+    mr: "स्वीजन फाउंडेशन मोफत आरोग्य शिबिरे आयोजित करते, ज्यामध्ये डॉक्टरांचा सल्ला, मोफत औषध वाटप आणि आरोग्य तपासणी समाविष्ट आहे.",
+    gu: "સ્વીઝન ફાઉન્ડેશન મફત આરોગ્ય કેમ્પ યોજે છે જેમાં ડૉક્ટરની સલાહ, મફત દવા વિતરણ અને આરોગ્ય ચકાસણી શામેલ છે.",
+    ta: "ஸ்வீஸன் அறக்கட்டளை இலவச மருத்துவ முகாம்களை நடத்தி, இலவச மருந்துகள் மற்றும் மருத்துவ ஆலோசனைகளை வழங்குகிறது.",
+    te: "స్వీజెన్ ఫౌండేషన్ ఉచిత వైద్య శిబిరాలను నిర్వహిస్తుంది, ఉచిత మందులు మరియు వైద్య సలహాలను అందిస్తుంది.",
+    kn: "ಸ್ವೀಜನ್ ಫೌಂಡೇಶನ್ ಉಚಿತ ವೈದ್ಯಕೀಯ ಶಿಬಿರಗಳನ್ನು ಆಯೋಜಿಸುತ್ತದೆ, ಉಚಿತ ಔಷಧಗಳು ಮತ್ತು ವೈದ್ಯಕೀಯ ಸಲಹೆಗಳನ್ನು ನೀಡುತ್ತದೆ.",
+    ml: "സ്വീസൻ ഫൗണ്ടേഷൻ സൗജന്യ വൈദ്യപരിശോധനാ ക്യാമ്പുകൾ സംഘടിപ്പിക്കുകയും സൗജന്യ മരുന്നുകളും മെഡിക്കൽ ഉപദേശങ്ങളും നൽകുകയും ചെയ്യുന്നു.",
+    or: "ସ୍ୱୀଜେନ୍ ଫାଉଣ୍ଡେସନ୍ ମାଗଣା ସ୍ୱାସ୍ଥ୍ୟ ଶିବିର ଆୟୋଜନ କରେ, ଯେଉଁଥିରେ ଡାକ୍ତରୀ ପରାମର୍ଶ ଏବଂ ମାଗଣା ଔଷଧ ବିତରଣ କରାଯାଏ।",
+    ur: "سویزن فاؤنڈیشن مفت طبی کیمپس کا انعقاد کرتی ہے جہاں مفت ادویات اور طبی مشورے فراہم کیے جاتے ہیں۔"
+  },
+  education: {
+    en: "Our Education & Child Welfare programs provide free school kits, textbooks, digital literacy labs, after-school tutoring, and merit scholarships to empower underprivileged children.",
+    hi: "हमारी शिक्षा और बाल कल्याण पहल के तहत जरूरतमंद बच्चों को मुफ्त किताबें, स्कूल किट, डिजिटल शिक्षा और छात्रवृत्ति सहायता प्रदान की जाती है ताकि कोई भी बच्चा शिक्षा से वंचित न रहे।",
+    bn: "আমাদের শিক্ষা ও শিশু কল্যাণ প্রকল্পের মাধ্যমে দুস্থ শিশুদের বিনামূল্যে বই, স্কুল কিট, ডিজিটাল শিক্ষা এবং বৃত্তি সহায়তা প্রদান করা হয়।",
+    pa: "ਸਾਡੀ ਸਿੱਖਿਆ ਅਤੇ ਬਾਲ ਭਲਾਈ ਪਹਿਲਕਦਮੀ ਦੇ ਤਹਿਤ ਲੋੜਵੰਦ ਬੱਚਿਆਂ ਨੂੰ ਮੁਫ਼ਤ ਕਿਤਾਬਾਂ, ਸਕੂਲ ਕਿੱਟਾਂ ਅਤੇ ਡਿਜੀਟਲ ਸਿੱਖਿਆ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ।",
+    mr: "आमच्या शिक्षण आणि बाल कल्याण उपक्रमांतर्गत गरजवंत मुलांना मोफत पुस्तके, शाळा किट आणि डिजिटल शिक्षण दिले जाते.",
+    gu: "અમારી શિક્ષણ અને બાળ કલ્યાણ પહેલ હેઠળ જરૂરિયાતમંદ બાળકોને મફત પુસ્તકો, શાળા કિટ અને ડિજિટલ શિક્ષણ આપવામાં આવે છે.",
+    ta: "எங்கள் கல்வி திட்டத்தின் மூலம் ஏழை குழந்தைகளுக்கு இலவச புத்தகங்கள், பள்ளி உபகரணங்கள் மற்றும் டிஜிட்டல் கல்வி வழங்கப்படுகிறது.",
+    te: "మా విద్యా పథకం ద్వారా పేద పిల్లలకు ఉచిత పుస్తకాలు, పాఠశాల కిట్లు మరియు డిజిటల్ విద్య అందించబడుతుంది.",
+    kn: "ನಮ್ಮ ಶಿಕ್ಷಣ ಯೋಜನೆಯ ಮೂಲಕ ಬಡ ಮಕ್ಕಳಿಗೆ ಉಚಿತ ಪುಸ್ತಕಗಳು, ಶಾಲಾ ಕಿಟ್‌ಗಳು ಮತ್ತು ಡಿಜಿಟಲ್ ಶಿಕ್ಷಣವನ್ನು ನೀಡಲಾಗುತ್ತದೆ.",
+    ml: "ഞങ്ങളുടെ വിദ്യാഭ്യാസ പദ്ധതിയിലൂടെ നിർദ്ധനരായ കുട്ടികൾക്ക് സൗജന്യ പുസ്തകങ്ങളും സ്കൂൾ കിറ്റുകളും ഡിജിറ്റൽ വിദ്യാഭ്യാസവും നൽകുന്നു.",
+    or: "ଆମର ଶିକ୍ଷା ଓ ଶିଶୁ କଲ୍ୟାଣ ଯୋଜନା ମାଧ୍ୟମରେ ଅସହାୟ ପିଲାମାନଙ୍କୁ ମାଗଣା ବହି, ସ୍କୁଲ କିଟ୍ ଏବଂ ଡିଜିଟାଲ୍ ଶିକ୍ଷା ପ୍ରଦାନ କରାଯାଏ।",
+    ur: "ہماری تعلیم اور بچوں کی فلاح و بہبود کی اسکیم کے تحت غریب بچوں کو مفت کتابیں، اسکول کٹس اور ڈیجیٹل تعلیم فراہم کی جاتی ہے۔"
+  },
+  foundation: {
+    en: "Sweezen Foundation is a certified Section 8 non-profit organization dedicated to Healthcare, Education, Rural Upliftment, and Environmental Sustainability aligned with UN SDGs.",
+    hi: "स्वीजन फाउंडेशन एक पंजीकृत धर्मार्थ संस्था है जो संयुक्त राष्ट्र के सतत विकास लक्ष्यों (UN SDGs) के तहत स्वास्थ्य, शिक्षा, ग्रामीण विकास और पर्यावरण संरक्षण के लिए समर्पित है।",
+    bn: "সুইজেন ফাউন্ডেশন একটি নিবন্ধিত অলাভজনক সংস্থা যা স্বাস্থ্য, শিক্ষা, গ্রামীণ উন্নয়ন এবং পরিবেশ স্যানিটেশনের জন্য কাজ করে।",
+    pa: "ਸਵੀਜ਼ਨ ਫਾਊਂਡੇਸ਼ਨ ਇੱਕ ਗੈਰ-ਲਾਭਕਾਰੀ ਸੰਸਥਾ ਹੈ ਜੋ ਸਿਹਤ, ਸਿੱਖਿਆ ਅਤੇ ਵਾਤਾਵਰਨ ਸੰਭਾਲ ਲਈ ਕੰਮ ਕਰਦੀ ਹੈ।",
+    mr: "स्वीजन फाउंडेशन ही एक ना-नफा संस्था आहे जी आरोग्य, शिक्षण आणि ग्रामीण विकासासाठी कार्य करते.",
+    gu: "સ્વીઝન ફાઉન્ડેશન એ એક નોન-પ્રોફિટ સંસ્થા છે જે આરોગ્ય, શિક્ષણ અને ગ્રામીણ વિકાસ માટે કામ કરે છે.",
+    ta: "ஸ்வீஸன் அறக்கட்டளை சுகாதாரம், கல்வி மற்றும் கிராமப்புற வளர்ச்சிக்காக செயல்படும் ஒரு தொண்டு நிறுவனமாகும்.",
+    te: "స్వీజెన్ ఫౌండేషన్ ఆరోగ్యం, విద్య మరియు గ్రామీణాభివృద్ధి కోసం పనిచేసే స్వచ్ఛంద సంస్థ.",
+    kn: "ಸ್ವೀಜನ್ ಫೌಂಡೇಶನ್ ಆರೋಗ್ಯ, ಶಿಕ್ಷಣ ಮತ್ತು ಗ್ರಾಮೀಣಾಭಿವೃದ್ಧಿಗಾಗಿ ಕೆಲಸ ಮಾಡುವ ಲಾಭರಹಿತ ಸಂಸ್ಥೆಯಾಗಿದೆ.",
+    ml: "സ്വീസൻ ഫൗണ്ടേഷൻ ആരോഗ്യം, വിദ്യാഭ്യാസം, ഗ്രാമീണ വികസനം എന്നിവയ്ക്കായി പ്രവർത്തിക്കുന്ന ഒരു ലാഭരഹിത സംഘടനയാണ്.",
+    or: "ସ୍ୱୀଜେନ୍ ଫାଉଣ୍ଡେସନ୍ ହେଉଛି ଏକ ସ୍ୱେଚ୍ଛାସେବୀ ଅନୁଷ୍ଠାନ ଯାହା ସ୍ୱାସ୍ଥ୍ୟ, ଶିକ୍ଷା ଓ ଗ୍ରାମୀଣ ବିକାଶ ପାଇଁ କାର୍ଯ୍ୟ କରେ।",
+    ur: "سویزن فاؤنڈیشن ایک غیر منافع بخش تنظیم ہے جو صحت، تعلیم اور دیہی ترقی کے لیے کام کرتی ہے۔"
+  },
+  volunteer: {
+    en: "To join as a Sweezen Volunteer, register your profile, select your skills, and check your dashboard for field coordination tasks to earn official certificates & impact points!",
+    hi: "स्वीजन स्वयंसेवक बनने के लिए अपनी प्रोफाइल बनाएं, अपने कौशल जोड़ें और आधिकारिक प्रमाण पत्र और इम्पैक्ट पॉइंट्स अर्जित करने के लिए मोबाइल ऐप डैशबोर्ड पर असाइन किए गए कार्यों को पूरा करें।",
+    bn: "সুইজেন সেচ্ছাসেবক হিসেবে যোগ দিতে আপনার প্রোফাইল তৈরি করুন এবং অ্যাপ থেকে কাজের সুবিধা পান।",
+    pa: "ਸਵੀਜ਼ਨ ਵਲੰਟੀਅਰ ਬਣਨ ਲਈ ਆਪਣੀ ਪ੍ਰੋਫਾਈਲ ਬਣਾਓ ਅਤੇ ਐਪ ਤੋਂ ਕੰਮ ਪੂਰੇ ਕਰੋ।",
+    mr: "स्वीजन स्वयंसेवक होण्यासाठी तुमचे प्रोफाईल पूर्ण करा आणि ॲपद्वारे कामे पूर्ण करा.",
+    gu: "સ્વીઝન સ્વયંસેવક બનવા માટે તમારી પ્રોફાઇલ પૂર્ણ કરો અને કામગીરી પૂર્ણ કરો.",
+    ta: "ஸ்வீஸன் தொண்டராக இணைய உங்கள் விவரங்களைப் பூர்த்தி செய்து பணிகள் பெறவும்.",
+    te: "స్వీజెన్ స్వచ్ఛంద సేవకుడిగా చేరడానికి మీ వివరాలను పూర్తి చేయండి.",
+    kn: "ಸ್ವೀಜನ್ ಸ್ವಯಂಸೇವಕರಾಗಿ ಸೇರಲು ನಿಮ್ಮ ವಿವರಗಳನ್ನು ನೀಡಿ.",
+    ml: "സ്വീസൻ സന്നദ്ധപ്രവർത്തകനായി ചേരാൻ നിങ്ങളുടെ വിവരങ്ങൾ നൽകുക.",
+    or: "ସ୍ୱୀଜେନ୍ ସ୍ୱେଚ୍ଛାସେବୀ ଭାବରେ ଯୋଗ ଦେବା ପାଇଁ ପ୍ରୋଫାଇଲ୍ ପୂରଣ କରନ୍ତୁ।",
+    ur: "سویزن رضاکار بننے کے لیے اپنی پروفائل مکمل کریں۔"
+  },
+  humanity: {
+    en: "The Humanity Smart ID Card is a QR-enabled digital identity for beneficiaries that safely records healthcare, food distribution, and welfare services directly onto the cloud.",
+    hi: "ह्यूमैनिटी स्मार्ट आईडी कार्ड लाभार्थियों के लिए एक डिजिटल क्यूआर कार्ड है, जिसके जरिए स्वास्थ्य जांच, राशन और अन्य सेवाओं का विवरण सुरक्षित रूप से दर्ज किया जाता है।",
+    bn: "হিউম্যানিটি স্মার্ট আইডি কার্ড হল সুবিধাভোগীদের জন্য একটি ডিজিটাল কিউআর পরিচয়পত্র।",
+    pa: "ਹਿਊਮੈਨਿਟੀ ਸਮਾਰਟ ਆਈਡੀ ਕਾਰਡ ਲਾਭਪਾਤਰੀਆਂ ਲਈ ਇੱਕ QR ਡਿਜੀਟਲ ਪਛਾਣ ਪੱਤਰ ਹੈ।",
+    mr: "ह्युमॅनिटी स्मार्ट आयडी कार्ड हे लाभार्थ्यांसाठी एक डिजिटल क्यूआर ओळखपत्र आहे.",
+    gu: "હ્યુમેનિટી સ્માર્ટ આઈડી કાર્ડ એ લાભાર્થીઓ માટે એક ડિજિટલ QR ઓળખપત્ર છે.",
+    ta: "ஹியூமானிட்டி ஸ்மார்ட் ஐடி கார்டு என்பது பயனாளிகளுக்கான டிஜிட்டல் அடையாள அட்டையாகும்.",
+    te: "హ్యుమానిటీ స్మార్ట్ ఐడీ కార్డ్ అనేది లబ్ధిదారుల కోసం డిజిటల్ గుర్తింపు కార్డు.",
+    kn: "ಹ್ಯುಮ್ಯಾನಿಟಿ ಸ್ಮಾರ್ಟ್ ಐಡಿ ಕಾರ್ಡ್ ಫಲಾನುಭವಿಗಳಿಗೆ ಡಿಜಿಟಲ್ ಗುರುತಿನ ಚೀಟಿಯಾಗಿದೆ.",
+    ml: "ഹ്യൂമാനിറ്റി സ്മാർട്ട് ഐഡി കാർഡ് ഡിജിറ്റൽ തിരിച്ചറിയൽ കാർഡാണ്.",
+    or: "ହିଉମାନିଟି ସ୍ମାର୍ଟ ଆଇଡି କାର୍ଡ ହେଉଛି ହିତାଧିକାରୀଙ୍କ ପାଇଁ ଡିଜିଟାଲ୍ QR ପରିଚୟ ପତ୍ର।",
+    ur: "ہیومینیٹی اسمارٹ آئی ڈی کارڈ مستفیدین کے لیے ایک ڈیجیٹل QR کارڈ ہے۔"
+  },
+  escalate: {
+    en: "I am connecting your query to our Sweezen Live Support Desk. You can also reach our official WhatsApp Helpline at +91 98765 43210 or email support@sweezenfoundation.org.",
+    hi: "मैं आपकी समस्या को Sweezen सहायता डेस्क को हस्तांतरित कर रहा हूँ। आप हमारे आधिकारिक व्हाट्सएप हेल्पलाइन +91 98765 43210 या ईमेल support@sweezenfoundation.org पर भी संपर्क कर सकते हैं।",
+    bn: "আমি আপনাকে সুইজেন লাইভ সাপোর্ট ডেস্কের সাথে যুক্ত করছি। হোয়াটসঅ্যাপ হেল্পলাইন: +91 98765 43210.",
+    pa: "ਮੈਂ ਤੁਹਾਨੂੰ ਸਵੀਜ਼ਨ ਲਾਈਵ ਸਪੋਰਟ ਡੈਸਕ ਨਾਲ ਜੋੜ ਰਿਹਾ ਹਾਂ। ਵਟਸਐਪ ਹੈਲਪਲਾਈਨ: +91 98765 43210.",
+    mr: "मी तुम्हाला स्वीजन थेट मदत प्रतिनिधीशी जोडत आहे. व्हॉट्सॲप हेल्पलाइन: +91 98765 43210.",
+    gu: "હું તમને સ્વીઝન લાઈવ સપોર્ટ ડેસ્ક સાથે જોડી રહ્યો છું. વોટ્સએપ હેલ્પલાઈન: +91 98765 43210.",
+    ta: "எங்கள் வாடிக்கையாளர் சேவை மையத்துடன் உங்களை இணைக்கிறேன். வாட்ஸ்அப் உதவி எண்: +91 98765 43210.",
+    te: "మిమ్మల్ని మా లైవ్ సపోర్ట్ డెస్క్‌తో అనుసంధానిస్తున్నాను. వాట్సాప్ హెల్ప్‌లైన్: +91 98765 43210.",
+    kn: "ನಮ್ಮ ಲೈವ್ ಸಪೋರ್ಟ್ ಡೆಸ್ಕ್‌ನೊಂದಿಗೆ ಸಂಪರ್ಕಿಸುತ್ತಿದ್ದೇವೆ. ವಾಟ್ಸಾಪ್ ಸಹಾಯವಾಣಿ: +91 98765 43210.",
+    ml: "ഞങ്ങളുടെ തത്സമയ സഹായ കേന്ദ്രവുമായി നിങ്ങളെ ബന്ധിപ്പിക്കുന്നു. വാട്ട്സ്ആപ്പ്: +91 98765 43210.",
+    or: "ମୁଁ ଆପଣଙ୍କୁ ଆମର ଲାଇଭ୍ ସପୋର୍ଟ ଡେସ୍କ ସହ ଯୋଡୁଛି। ୱାଟସଏପ୍: +91 98765 43210।",
+    ur: "میں آپ کو سویزن لائیو سپورٹ ڈیسک سے جوڑ رہا ہوں۔ واٹس ایپ ہیلپ لائن: 9876543210 91+۔"
+  }
+};
+
 exports.askSweezen = async (req, res) => {
   try {
     const { question, language } = req.body;
     const q = (question || '').toLowerCase();
-    const isHindi = language === 'hi' || q.includes('नमस्ते') || q.includes('दान') || q.includes('क्या');
+    const lang = (language || 'en').toLowerCase().trim();
 
-    let responseText = '';
-    let sources = [];
+    let category = 'foundation';
     let requiresEscalation = false;
 
-    if (q.includes('tax') || q.includes('80g') || q.includes('exemption') || q.includes('टैक्स')) {
-      responseText = isHindi 
-        ? 'स्वीजन फाउंडेशन की सभी दान राशियां आयकर अधिनियम की धारा 80G के तहत 50% कर छूट के लिए पात्र हैं। दान पूर्ण होते ही तुरंत डिजिटल 80G ई-रसीद प्राप्त करें।'
-        : 'All donations to Sweezen Foundation are eligible for 50% tax exemption under Section 80G of the Income Tax Act (Reg No: AAATS9012E20261). You will receive an instant downloadable 80G e-receipt immediately after donating.';
-      sources = ['Income Tax Act Section 80G Approval Certificate #80G/2026/SWZ', 'Sweezen Annual Audit Report Q3 2026'];
-    } else if (q.includes('donate') || q.includes('payment') || q.includes('upi') || q.includes('दान')) {
-      responseText = isHindi
-        ? 'आप ऐप के "Donate" टैब से UPI, डेबिट/क्रेडिट कार्ड या नेट बैंकिंग के जरिए किसी भी प्रोजेक्ट या सामान्य फंड में आसानी से दान कर सकते हैं।'
-        : 'You can easily donate using UPI, Debit/Credit Card, or Net Banking via Razorpay by visiting the "Donate" tab or clicking "BE THE REASON SOMEONE SMILES" on any project page.';
-      sources = ['Sweezen Verified Payment Portal Documentation'];
-    } else if (q.includes('volunteer') || q.includes('join') || q.includes('task') || q.includes('स्वयंसेवक')) {
-      responseText = isHindi
-        ? 'स्वयंसेवक बनने के लिए प्रोफाइल रजिस्टर करें, अपने कौशल जोड़ें और "Volunteer" डैशबोर्ड पर असाइन किए गए फ़ील्ड कार्यों को पूरा करके इम्पैक्ट पॉइंट्स कमाएं।'
-        : 'To become a volunteer, complete registration, add your skills, and view your assigned field tasks in the "Volunteer" tab to start earning impact points and badges!';
-      sources = ['Sweezen Volunteer Framework 2026 Guidelines'];
-    } else if (q.includes('humanity') || q.includes('card') || q.includes('smart id') || q.includes('कार्ड')) {
-      responseText = isHindi
-        ? 'ह्यूमैनिटी कार्ड ग्रामीण लाभार्थियों के लिए एक डिजिटल स्मार्ट आईडी है। फ़ील्ड स्वयंसेवक क्यूआर कोड स्कैन करके स्वास्थ्य और शिक्षा सेवाओं को क्लाउड पर तुरंत रिकॉर्ड करते हैं।'
-        : 'The Humanity Card is a digital Smart ID for beneficiaries. Field volunteers scan the QR code at service points to instantly record health and education on the secure cloud database.';
-      sources = ['Sweezen Rural Digital ID Guidelines'];
-    } else if (q.includes('human') || q.includes('agent') || q.includes('talk') || q.includes('help') || q.includes('शिकायत') || q.includes('बात')) {
-      responseText = isHindi
-        ? 'मैं आपकी समस्या को Sweezen फाउंडेशन सहायता टीम को हस्तांतरित कर रहा हूँ। हमारी टीम आपसे WhatsApp या फोन पर तुरंत संपर्क करेगी।'
-        : 'I am escalating your query to a Sweezen Foundation Support Representative. Our team will contact you via phone or WhatsApp shortly.';
+    if (q.includes('tax') || q.includes('80g') || q.includes('exemption') || q.includes('टैक्स') || q.includes('কর') || q.includes('ਟੈਕਸ') || q.includes('પાત્ર')) {
+      category = 'tax';
+    } else if (q.includes('health') || q.includes('doctor') || q.includes('medical') || q.includes('camp') || q.includes('hospital') || q.includes('स्वास्थ्य') || q.includes('மருத்துவம்') || q.includes('ವೈದ್ಯಕೀಯ')) {
+      category = 'healthcare';
+    } else if (q.includes('education') || q.includes('school') || q.includes('child') || q.includes('book') || q.includes('shiksha') || q.includes('शिक्षा') || q.includes('கல்வி') || q.includes('విద్య')) {
+      category = 'education';
+    } else if (q.includes('volunteer') || q.includes('join') || q.includes('task') || q.includes('स्वयंसेवक') || q.includes('ਤੋਂ ਕੰਮ') || q.includes('તસ્વીર')) {
+      category = 'volunteer';
+    } else if (q.includes('humanity') || q.includes('card') || q.includes('smart id') || q.includes('कार्ड') || q.includes('ਕਾਰਡ')) {
+      category = 'humanity';
+    } else if (q.includes('human') || q.includes('agent') || q.includes('talk') || q.includes('support') || q.includes('help') || q.includes('escalat') || q.includes('बात') || q.includes('शिकायत') || q.includes('कॉल')) {
+      category = 'escalate';
       requiresEscalation = true;
-      sources = ['Sweezen Support Escalation Desk'];
-    } else {
-      responseText = isHindi
-        ? 'नमस्ते! मैं स्वीजन AI सहायक हूँ। मैं आपकी दान, स्वयंसेवा, 80G टैक्स रसीद, ह्यूमैनिटी कार्ड या हमारे प्रोजेक्ट्स के बारे में सहायता कर सकता हूँ।'
-        : 'Hello! I am Sweezen AI Assistant. I can help you with donations, 80G tax benefit receipts, volunteer task reporting, Humanity Smart IDs, and active Foundation programs. How may I assist you today?';
-      sources = ['Sweezen Foundation Official Knowledge Base'];
     }
+
+    // Retrieve localized answer
+    const categoryAnswers = KNOWLEDGE_RESPONSES[category] || KNOWLEDGE_RESPONSES.foundation;
+    let baseAnswer = categoryAnswers[lang] || categoryAnswers['en'] || categoryAnswers['hi'];
+
+    // Append safety disclaimer
+    const disclaimer = SAFETY_DISCLAIMERS[lang] || SAFETY_DISCLAIMERS['en'];
+    const finalAnswer = `${baseAnswer}${disclaimer}`;
+
+    const sources = [
+      'Sweezen Foundation Official Knowledge Base 2026',
+      'Income Tax Act 1961 Section 80G Approval #80G/2026/SWZ',
+      'UN SDG Goal 3 (Healthcare) & Goal 4 (Quality Education) Framework'
+    ];
 
     return res.status(200).json({
       success: true,
-      answer: responseText,
+      category,
+      answer: finalAnswer,
       sources,
       requires_escalation: requiresEscalation,
-      escalation_contact: requiresEscalation ? '+91 98765 43210 (Support Desk)' : null,
+      escalation_contact: requiresEscalation ? '+91 98765 43210 (Sweezen WhatsApp Helpline)' : null,
       quick_suggestions: [
-        'How do I claim 80G tax benefit?',
-        'Talk to Human Support Representative',
-        'Show active healthcare projects',
-        'How to scan Humanity Smart ID?'
+        '🏛️ Foundation Mission & Vision',
+        '📜 80G Tax Exemption Info',
+        '🏥 Healthcare & Free Camps',
+        '📚 Education & Child Welfare',
+        '🤝 Volunteering & Tasks',
+        '🪪 Humanity Smart ID Card',
+        '📞 Live Human Support'
       ]
     });
   } catch (err) {
+    console.error('Chatbot Controller Error:', err);
     return res.status(500).json({ success: false, message: 'Chatbot service error' });
   }
 };
-
