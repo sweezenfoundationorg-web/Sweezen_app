@@ -45,6 +45,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final state = Provider.of<AppStateProvider>(context);
     final loc = AppLocalizations(state.currentLanguage);
 
     final List<Widget> tabs = [
