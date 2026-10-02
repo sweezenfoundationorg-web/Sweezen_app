@@ -626,29 +626,29 @@
       <div class="stat-card">
         <div class="stat-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
         <div class="stat-info">
-          <h3 id="stat-funds">₹4,82,00,000</h3>
-          <p>FUNDS RAISED (AUDITED)</p>
+          <h3 id="stat-funds">₹27,912</h3>
+          <p>FUNDS RAISED (MONGODB)</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon"><i class="fa-solid fa-bullseye"></i></div>
         <div class="stat-info">
-          <h3 id="stat-projects">25</h3>
+          <h3 id="stat-projects">2</h3>
           <p>ACTIVE CAMPAIGNS</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
         <div class="stat-info">
-          <h3 id="stat-beneficiaries">48,200</h3>
+          <h3 id="stat-beneficiaries">211</h3>
           <p>BENEFICIARIES IMPACTED</p>
         </div>
       </div>
       <div class="stat-card">
         <div class="stat-icon"><i class="fa-solid fa-hands-helping"></i></div>
         <div class="stat-info">
-          <h3 id="stat-volunteers">1,240</h3>
-          <p>REGISTERED VOLUNTEERS</p>
+          <h3 id="stat-volunteers">19</h3>
+          <p>REGISTERED MEMBERS</p>
         </div>
       </div>
       <div class="stat-card">
@@ -1090,10 +1090,15 @@
         const statsRes = await fetch(`${API_BASE}/admin/stats`).then(r => r.json());
         if (statsRes.success) {
           const s = statsRes.stats;
-          document.getElementById('stat-funds').innerText = `₹${(s.totalFundsRaised || 48200000).toLocaleString('en-IN')}`;
-          document.getElementById('stat-projects').innerText = s.totalProjects || 25;
-          document.getElementById('stat-beneficiaries').innerText = (s.totalBeneficiaries || 48200).toLocaleString('en-IN');
-          document.getElementById('stat-volunteers').innerText = s.totalVolunteers || 1240;
+          const funds = s.totalFundsRaised !== undefined ? s.totalFundsRaised : 27912;
+          const proj = s.totalProjects !== undefined ? s.totalProjects : 2;
+          const ben = s.totalBeneficiaries !== undefined ? s.totalBeneficiaries : 211;
+          const vol = s.totalVolunteers !== undefined ? s.totalVolunteers : 19;
+
+          document.getElementById('stat-funds').innerText = `₹${funds.toLocaleString('en-IN')}`;
+          document.getElementById('stat-projects').innerText = proj;
+          document.getElementById('stat-beneficiaries').innerText = ben.toLocaleString('en-IN');
+          document.getElementById('stat-volunteers').innerText = vol;
         }
 
         const projectsRes = await fetch(`${API_BASE}/projects`).then(r => r.json());
