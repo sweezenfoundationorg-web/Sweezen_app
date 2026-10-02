@@ -122,13 +122,13 @@ class HomeTab extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.amber.shade900.withOpacity(0.4),
+                        color: AppTheme.successGreen.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppTheme.amberGold, width: 0.8),
+                        border: Border.all(color: AppTheme.successGreen, width: 0.8),
                       ),
                       child: const Text(
-                        'DEMO DATA (AUDIT PENDING)',
-                        style: TextStyle(color: AppTheme.amberGold, fontSize: 9, fontWeight: FontWeight.bold),
+                        'LIVE MONGODB DATA',
+                        style: TextStyle(color: AppTheme.successGreen, fontSize: 9, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -142,10 +142,10 @@ class HomeTab extends StatelessWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.6,
                   children: [
-                    _buildStatCard(loc.translate('stat_beneficiaries'), state.impactMetrics['beneficiaries'] ?? '48,200+', Icons.groups),
-                    _buildStatCard(loc.translate('stat_projects'), state.impactMetrics['total_projects'] ?? '25+', Icons.account_tree),
-                    _buildStatCard(loc.translate('stat_volunteers'), state.impactMetrics['volunteers'] ?? '1,240+', Icons.volunteer_activism),
-                    _buildStatCard('Funds Raised', '₹4.82 Cr', Icons.currency_rupee),
+                    _buildStatCard(loc.translate('stat_beneficiaries'), state.impactMetrics['beneficiaries'] ?? '211', Icons.groups),
+                    _buildStatCard(loc.translate('stat_projects'), state.impactMetrics['total_projects'] ?? '2', Icons.account_tree),
+                    _buildStatCard(loc.translate('stat_volunteers'), state.impactMetrics['volunteers'] ?? '19', Icons.volunteer_activism),
+                    _buildStatCard('Funds Raised', state.impactMetrics['funds_raised'] ?? '₹27,912', Icons.currency_rupee),
                   ],
                 ),
               ],

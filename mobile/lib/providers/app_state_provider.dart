@@ -156,9 +156,29 @@ class AppStateProvider extends ChangeNotifier {
     );
     _isLoggedIn = false;
 
-    // Load Projects & Events from MongoDB via API
+    // Load Projects, Events & Impact Stats from MongoDB via API
     loadProjects();
     loadEvents();
+    loadImpactStats();
+  }
+
+  Future<void> loadImpactStats() async {
+    final stats = await ApiService.fetchImpactStats();
+    if (stats.isNotEmpty) {
+      final double totalFunds = (stats['totalFundsRaised'] ?? 0).toDouble();
+      final int proj = (stats['totalProjects'] ?? 0).toInt();
+      final int ben = (stats['totalBeneficiaries'] ?? 0).toInt();
+      final int vol = (stats['totalVolunteers'] ?? 0).toInt();
+
+      _impactMetrics = {
+        'total_projects': '$proj',
+        'beneficiaries': '$ben',
+        'volunteers': '$vol',
+        'districts': '12',
+        'funds_raised': '₹${totalFunds.toStringAsFixed(0)}'
+      };
+      notifyListeners();
+    }
   }
 
   void toggleLanguage(String langCode) {

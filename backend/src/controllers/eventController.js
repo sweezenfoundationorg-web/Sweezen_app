@@ -1,4 +1,5 @@
 const { getCollection, memoryDb } = require('../config/db');
+const { createSmartNotification } = require('../services/notificationService');
 
 exports.getEvents = async (req, res) => {
   try {
@@ -68,6 +69,14 @@ exports.registerForEvent = async (req, res) => {
         { $inc: { registered_count: 1 } }
       );
     }
+
+    createSmartNotification({
+      userId: req.user?.id || 'volunteer',
+      category: 'EVENT_REMINDER',
+      title: '📅 Event Registration Confirmed!',
+      body: 'You are registered for upcoming Sweezen Community drive. Pass & details saved to your account.',
+      data: { eventId: String(event_id || '') }
+    }).catch(e => console.error('Event notification error:', e.message));
 
     return res.status(200).json({
       success: true,

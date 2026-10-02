@@ -232,4 +232,16 @@ class ApiService {
       return {'success': false, 'message': e.toString()};
     }
   }
+
+  // Fetch Real Impact Stats from MongoDB
+  static Future<Map<String, dynamic>> fetchImpactStats() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/stats'));
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        return data['stats'] ?? {};
+      }
+    } catch (_) {}
+    return {};
+  }
 }

@@ -1,5 +1,6 @@
 const { getCollection, memoryDb } = require('../config/db');
 const { createOrder, verifySignature } = require('../config/razorpay');
+const { createSmartNotification } = require('../services/notificationService');
 
 // 1. Create Razorpay Order & Initiate Donation
 exports.createDonationOrder = async (req, res) => {
@@ -136,6 +137,15 @@ exports.verifyDonationPayment = async (req, res) => {
         memProj.funding_raised = (memProj.funding_raised || 0) + donationAmount;
       }
     }
+
+    // Dispatch Smart Notification & background push
+    createSmartNotification({
+      userId: donorEmailVal || 'donor',
+      category: 'DONATION_RECEIPT',
+      title: '🎉 Donation Verified & 80G Receipt Issued!',
+      body: `Thank you ${donorNameVal}! Your donation of ₹${donationAmount} is received. Download your 80G tax receipt now.`,
+      data: { txnId, amount: String(donationAmount), receiptUrl: `/api/donations/receipt/${txnId}` }
+    }).catch(e => console.error('Notification dispatch error:', e.message));
 
     return res.status(200).json({
       success: true,

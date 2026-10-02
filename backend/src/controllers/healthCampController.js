@@ -1,5 +1,6 @@
 const { getCollection, memoryDb } = require('../config/db');
 const { logAudit } = require('../services/auditLogService');
+const { createSmartNotification } = require('../services/notificationService');
 
 if (!memoryDb.healthCamps) {
   memoryDb.healthCamps = [
@@ -105,6 +106,15 @@ exports.bookCampSlot = async (req, res) => {
       targetModule: 'Health Camps',
       details: `Booked slot for ${camp.title}`
     });
+
+    // Dispatch Smart Notification
+    createSmartNotification({
+      userId: phone || 'beneficiary',
+      category: 'CAMP_REMINDER',
+      title: '🏥 Health Camp Slot Booking Confirmed!',
+      body: `Slot confirmed for ${beneficiary_name || 'Beneficiary'} at ${camp.title}. Show your QR pass upon arrival.`,
+      data: { campId: String(camp.id), qr: booking.booking_qr }
+    }).catch(e => console.error('Camp notification error:', e.message));
 
     return res.status(201).json({
       success: true,

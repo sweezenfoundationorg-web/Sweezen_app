@@ -1,4 +1,5 @@
 const { memoryDb } = require('../config/db');
+const { createSmartNotification } = require('../services/notificationService');
 
 // Lookup Card Details by QR Code Payload or Card Number
 exports.lookupCard = async (req, res) => {
@@ -65,6 +66,14 @@ exports.logServicePointScan = async (req, res) => {
     };
 
     memoryDb.humanityLogs.push(newLog);
+
+    createSmartNotification({
+      userId: card_number,
+      category: 'SMART_ID_LOG',
+      title: '🪪 Humanity Smart ID Service Recorded!',
+      body: `Service point scan: ${service_type} successfully recorded at ${newLog.location}.`,
+      data: { cardNumber: card_number, serviceType: service_type }
+    }).catch(e => console.error('Humanity Card notification error:', e.message));
 
     return res.status(201).json({
       success: true,

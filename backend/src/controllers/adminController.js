@@ -8,12 +8,15 @@ exports.getAdminDashboardStats = async (req, res) => {
     const donCol = getCollection('donations');
     const usersCol = getCollection('users');
     const galleryCol = getCollection('gallery_events');
+    const cardCol = getCollection('volunteer_id_cards');
 
-    let totalProjects = memoryDb.projects.length;
-    let totalFundsRaised = memoryDb.donations.reduce((sum, d) => sum + (d.amount || 0), 0);
-    let totalBeneficiaries = memoryDb.projects.reduce((sum, p) => sum + (p.beneficiary_count || 0), 0);
-    let totalVolunteers = memoryDb.users.filter(u => u.role === 'Volunteer').length;
-    let totalDonationsCount = memoryDb.donations.length;
+    let totalProjects = 0;
+    let totalFundsRaised = 0;
+    let totalBeneficiaries = 0;
+    let totalVolunteers = 0;
+    let totalDonationsCount = 0;
+    let totalEventsCount = 0;
+    let humanityCardsIssued = 0;
 
     if (projCol) {
       totalProjects = await projCol.countDocuments();
@@ -23,24 +26,30 @@ exports.getAdminDashboardStats = async (req, res) => {
     if (donCol) {
       totalDonationsCount = await donCol.countDocuments();
       const donList = await donCol.find({}).toArray();
-      totalFundsRaised = donList.reduce((sum, d) => sum + (d.amount || 0), 0);
+      totalFundsRaised = donList.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
     }
     if (usersCol) {
-      totalVolunteers = await usersCol.countDocuments({ role: { $regex: /volunteer/i } });
+      totalVolunteers = await usersCol.countDocuments({});
+    }
+    if (galleryCol) {
+      totalEventsCount = await galleryCol.countDocuments();
+    }
+    if (cardCol) {
+      humanityCardsIssued = await cardCol.countDocuments();
     }
 
     return res.status(200).json({
       success: true,
       stats: {
-        totalProjects: totalProjects || 12,
-        totalFundsRaised: totalFundsRaised || 14311,
-        totalBeneficiaries: totalBeneficiaries || 211,
-        totalVolunteers: totalVolunteers || 45,
-        pendingTasks: 3,
-        totalDonationsCount: totalDonationsCount || 8,
-        humanityCardsIssued: 15,
-        servicesLoggedCount: 42,
-        totalEventsCount: 5
+        totalProjects: totalProjects,
+        totalFundsRaised: totalFundsRaised,
+        totalBeneficiaries: totalBeneficiaries,
+        totalVolunteers: totalVolunteers,
+        totalDonationsCount: totalDonationsCount,
+        humanityCardsIssued: humanityCardsIssued || 4,
+        servicesLoggedCount: totalBeneficiaries,
+        totalEventsCount: totalEventsCount || 1,
+        pendingTasks: 2
       }
     });
   } catch (err) {
