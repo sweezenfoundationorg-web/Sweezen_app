@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
+import '../localization/app_localizations.dart';
 
 class AiAnalyticsScreen extends StatefulWidget {
   const AiAnalyticsScreen({Key? key}) : super(key: key);
@@ -28,15 +29,16 @@ class _AiAnalyticsScreenState extends State<AiAnalyticsScreen> with SingleTicker
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppStateProvider>(context);
+    final loc = AppLocalizations(state.currentLanguage);
 
     return Scaffold(
       backgroundColor: AppTheme.primaryNavy,
       appBar: AppBar(
         title: Row(
-          children: const [
-            Icon(Icons.auto_awesome, color: AppTheme.amberGold),
-            SizedBox(width: 8),
-            Text('AI-assisted Analytics'),
+          children: [
+            const Icon(Icons.auto_awesome, color: AppTheme.amberGold),
+            const SizedBox(width: 8),
+            Text(loc.translate('ai_analytics')),
           ],
         ),
         backgroundColor: AppTheme.primaryNavy,
@@ -45,10 +47,10 @@ class _AiAnalyticsScreenState extends State<AiAnalyticsScreen> with SingleTicker
           indicatorColor: AppTheme.amberGold,
           labelColor: AppTheme.amberGold,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.summarize), text: 'Report Summaries'),
-            Tab(icon: Icon(Icons.warning_amber), text: 'Data Anomalies'),
-            Tab(icon: Icon(Icons.approval), text: 'Draft Impact Reports'),
+          tabs: [
+            Tab(icon: const Icon(Icons.summarize), text: loc.translate('report_summaries')),
+            Tab(icon: const Icon(Icons.warning_amber), text: loc.translate('data_anomalies')),
+            Tab(icon: const Icon(Icons.approval), text: loc.translate('draft_impact_reports')),
           ],
         ),
       ),

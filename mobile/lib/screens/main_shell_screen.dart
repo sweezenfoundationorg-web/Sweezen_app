@@ -110,7 +110,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
                     AccessibilityDialog.show(context);
                   }),
                   const Divider(color: Colors.white12),
-                  _buildDrawerItem(Icons.event, 'Events & Conclaves', () {
+                  _buildDrawerItem(Icons.event, loc.translate('drawer_events'), () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen()));
                   }),
@@ -118,15 +118,15 @@ class _MainShellScreenState extends State<MainShellScreen> {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const HumanityCardScreen()));
                   }),
-                  _buildDrawerItem(Icons.map, 'Impact Map & Transparency', () {
+                  _buildDrawerItem(Icons.map, loc.translate('drawer_impact_map'), () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const ImpactMapScreen()));
                   }),
-                  _buildDrawerItem(Icons.campaign, 'Communication Center', () {
+                  _buildDrawerItem(Icons.campaign, loc.translate('drawer_communication'), () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunicationScreen()));
                   }),
-                  _buildDrawerItem(Icons.picture_as_pdf, 'Reports & Media', () {
+                  _buildDrawerItem(Icons.picture_as_pdf, loc.translate('drawer_reports'), () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportsScreen()));
                   }),
@@ -141,7 +141,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
             ),
 
             const Spacer(),
-            _buildDrawerItem(Icons.logout, 'Logout Account', () {
+            _buildDrawerItem(Icons.logout, loc.translate('drawer_logout'), () {
               state.logoutUser();
               Navigator.pushAndRemoveUntil(
                 context,

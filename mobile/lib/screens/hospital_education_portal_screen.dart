@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
+import '../localization/app_localizations.dart';
 
 class HospitalEducationPortalScreen extends StatefulWidget {
   const HospitalEducationPortalScreen({Key? key}) : super(key: key);
@@ -186,11 +187,12 @@ class _HospitalEducationPortalScreenState extends State<HospitalEducationPortalS
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppStateProvider>(context);
+    final loc = AppLocalizations(state.currentLanguage);
 
     return Scaffold(
       backgroundColor: AppTheme.primaryNavy,
       appBar: AppBar(
-        title: const Text('Hospital & Education Portals'),
+        title: Text(loc.translate('hospital_education_portal')),
         backgroundColor: AppTheme.primaryNavy,
         bottom: TabBar(
           controller: _tabController,
@@ -198,11 +200,11 @@ class _HospitalEducationPortalScreenState extends State<HospitalEducationPortalS
           indicatorColor: AppTheme.amberGold,
           labelColor: AppTheme.amberGold,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.apartment), text: 'Partner Registrations'),
-            Tab(icon: Icon(Icons.assignment_ind), text: 'Referrals'),
-            Tab(icon: Icon(Icons.event_note), text: 'Camp Schedules'),
-            Tab(icon: Icon(Icons.school), text: 'Student Progress'),
+          tabs: [
+            Tab(icon: const Icon(Icons.apartment), text: loc.translate('partner_registrations')),
+            Tab(icon: const Icon(Icons.assignment_ind), text: loc.translate('referrals')),
+            Tab(icon: const Icon(Icons.event_note), text: loc.translate('camp_schedules')),
+            Tab(icon: const Icon(Icons.school), text: loc.translate('student_progress')),
           ],
         ),
       ),
@@ -224,7 +226,7 @@ class _HospitalEducationPortalScreenState extends State<HospitalEducationPortalS
         backgroundColor: AppTheme.amberGold,
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
-        label: const Text('Submit Referral', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: Text(loc.translate('submit_referral'), style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

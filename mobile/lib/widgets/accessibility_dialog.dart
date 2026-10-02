@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
+import '../localization/app_localizations.dart';
 
 class AccessibilityDialog extends StatelessWidget {
   const AccessibilityDialog({Key? key}) : super(key: key);
@@ -18,6 +19,7 @@ class AccessibilityDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppStateProvider>(context);
+    final loc = AppLocalizations(state.currentLanguage);
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -34,12 +36,12 @@ class AccessibilityDialog extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                children: const [
-                  Icon(Icons.accessibility_new, color: AppTheme.amberGold, size: 28),
-                  SizedBox(width: 12),
+                children: [
+                  const Icon(Icons.accessibility_new, color: AppTheme.amberGold, size: 28),
+                  const SizedBox(width: 12),
                   Text(
-                    'Accessibility & Easy Navigation',
-                    style: TextStyle(
+                    loc.translate('accessibility_title'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -61,9 +63,9 @@ class AccessibilityDialog extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Text Size Scale',
-                  style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 15),
+                Text(
+                  loc.translate('text_scale_title'),
+                  style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -102,15 +104,15 @@ class AccessibilityDialog extends StatelessWidget {
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
-                          'High Contrast Mode (WCAG AAA)',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                          loc.translate('high_contrast_title'),
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
-                          'Enhances colors, borders, and text readability for low-vision users.',
-                          style: TextStyle(color: Colors.white70, fontSize: 11),
+                          loc.translate('high_contrast_sub'),
+                          style: const TextStyle(color: Colors.white70, fontSize: 11),
                         ),
                       ],
                     ),
@@ -135,13 +137,13 @@ class AccessibilityDialog extends StatelessWidget {
               border: Border.all(color: AppTheme.goldAccent.withValues(alpha: 0.3)),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.record_voice_over, color: AppTheme.goldAccent, size: 22),
-                SizedBox(width: 12),
+              children: [
+                const Icon(Icons.record_voice_over, color: AppTheme.goldAccent, size: 22),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'TalkBack / VoiceOver screen-reader semantic labels enabled across all forms, buttons, and navigation.',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    loc.translate('screen_reader_notice'),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ),
               ],

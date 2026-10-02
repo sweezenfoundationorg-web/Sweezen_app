@@ -5,6 +5,7 @@ import '../models/models.dart';
 import '../providers/app_state_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../localization/app_localizations.dart';
 import '../widgets/custom_gold_button.dart';
 import '../widgets/receipt_dialog.dart';
 

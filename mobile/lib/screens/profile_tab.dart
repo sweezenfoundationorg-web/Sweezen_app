@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../providers/app_state_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../localization/app_localizations.dart';
 import '../widgets/document_upload_modal.dart';
 import '../widgets/accessibility_dialog.dart';
 import 'login_screen.dart';
@@ -106,28 +107,28 @@ class _ProfileTabState extends State<ProfileTab> {
             const SizedBox(height: 20),
 
             // Profile Information List
-            _buildSectionHeader('PERSONAL & ACCOUNT INFORMATION'),
-            _buildInfoTile('Phone Number', user.phone, Icons.phone),
-            _buildInfoTile('Primary Location', user.location, Icons.location_on),
-            _buildInfoTile('Availability Schedule', user.availability, Icons.event_available),
-            _buildInfoTile('Humanity Smart ID', user.humanityCardId, Icons.qr_code),
+            _buildSectionHeader(loc.translate('personal_info_header')),
+            _buildInfoTile(loc.translate('phone_number'), user.phone, Icons.phone),
+            _buildInfoTile(loc.translate('primary_location'), user.location, Icons.location_on),
+            _buildInfoTile(loc.translate('availability_schedule'), user.availability, Icons.event_available),
+            _buildInfoTile(loc.translate('humanity_card'), user.humanityCardId, Icons.qr_code),
             const SizedBox(height: 20),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildSectionHeader('VERIFIED DOCUMENTS'),
+                _buildSectionHeader(loc.translate('verified_documents')),
                 GestureDetector(
                   onTap: _handleUploadNewDoc,
-                  child: const Padding(
-                    padding: EdgeInsets.only(bottom: 10),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: Row(
                       children: [
-                        Icon(Icons.add_circle_outline, color: AppTheme.amberGold, size: 16),
-                        SizedBox(width: 4),
+                        const Icon(Icons.add_circle_outline, color: AppTheme.amberGold, size: 16),
+                        const SizedBox(width: 4),
                         Text(
-                          'UPLOAD NEW',
-                          style: TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 11),
+                          loc.translate('upload_new'),
+                          style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 11),
                         ),
                       ],
                     ),
@@ -145,7 +146,7 @@ class _ProfileTabState extends State<ProfileTab> {
             }).toList(),
             const SizedBox(height: 20),
 
-            _buildSectionHeader('SECURITY & APP LOCK'),
+            _buildSectionHeader(loc.translate('security_app_lock')),
             Container(
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
@@ -155,8 +156,8 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               child: SwitchListTile(
                 secondary: const Icon(Icons.fingerprint, color: AppTheme.goldAccent, size: 24),
-                title: const Text('Fingerprint App Lock', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Lock app locally using biometric fingerprint / PIN', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                title: Text(loc.translate('fingerprint_lock'), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(loc.translate('fingerprint_sub'), style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 activeColor: AppTheme.goldAccent,
                 value: state.isAppLockEnabled,
                 onChanged: (val) async {
@@ -184,15 +185,15 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               child: ListTile(
                 leading: const Icon(Icons.security, color: AppTheme.goldAccent, size: 22),
-                title: const Text('Google 2FA Authenticator', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Bind 2FA TOTP QR code for account login', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                title: Text(loc.translate('google_2fa'), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(loc.translate('google_2fa_sub'), style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
                 onTap: () => _showGoogle2FASetupModal(context, user.email),
               ),
             ),
             const SizedBox(height: 12),
 
-            _buildSectionHeader('ACCESSIBILITY & ENTERPRISE PORTALS'),
+            _buildSectionHeader(loc.translate('specialized_portals')),
             Container(
               margin: const EdgeInsets.only(bottom: 8),
               decoration: BoxDecoration(
@@ -202,8 +203,8 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               child: ListTile(
                 leading: const Icon(Icons.accessibility_new, color: AppTheme.amberGold, size: 22),
-                title: const Text('Accessibility & Text Scaling', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Adjust text size scale, contrast & screen reader options', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                title: Text(loc.translate('accessibility_settings'), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(loc.translate('high_contrast_sub'), style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
                 onTap: () => AccessibilityDialog.show(context),
               ),
@@ -217,8 +218,8 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               child: ListTile(
                 leading: const Icon(Icons.corporate_fare, color: AppTheme.goldAccent, size: 22),
-                title: const Text('CSR Partner Dashboard', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Proposals, approved budgets, milestones & utilization', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                title: Text(loc.translate('csr_dashboard'), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(loc.translate('csr_proposals'), style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CsrPartnerDashboardScreen())),
               ),
@@ -232,8 +233,8 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               child: ListTile(
                 leading: const Icon(Icons.local_hospital, color: Colors.lightBlueAccent, size: 22),
-                title: const Text('Hospital & Education Portals', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Partner registrations, referrals, camps & student progress', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                title: Text(loc.translate('hospital_education_portal'), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(loc.translate('referrals'), style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HospitalEducationPortalScreen())),
               ),
@@ -247,20 +248,20 @@ class _ProfileTabState extends State<ProfileTab> {
               ),
               child: ListTile(
                 leading: const Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 22),
-                title: const Text('AI-assisted Analytics', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Report summaries, anomalies & draft impact approval', style: TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                title: Text(loc.translate('ai_analytics'), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(loc.translate('report_summaries'), style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                 trailing: const Icon(Icons.arrow_forward_ios, color: AppTheme.amberGold, size: 14),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAnalyticsScreen())),
               ),
             ),
             const SizedBox(height: 12),
 
-            _buildSectionHeader('APP PREFERENCES & LANGUAGE'),
+            _buildSectionHeader(loc.translate('app_prefs_lang')),
             ListTile(
               tileColor: AppTheme.cardNavy,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               leading: const Icon(Icons.language, color: AppTheme.goldAccent),
-              title: const Text('App Language', style: TextStyle(color: Colors.white, fontSize: 14)),
+              title: Text(loc.translate('app_language'), style: const TextStyle(color: Colors.white, fontSize: 14)),
               trailing: DropdownButton<String>(
                 value: state.currentLanguage,
                 dropdownColor: AppTheme.cardNavy,
@@ -297,7 +298,7 @@ class _ProfileTabState extends State<ProfileTab> {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 icon: const Icon(Icons.logout),
-                label: const Text('LOGOUT ACCOUNT', style: TextStyle(fontWeight: FontWeight.bold)),
+                label: Text(loc.translate('logout_account'), style: const TextStyle(fontWeight: FontWeight.bold)),
                 onPressed: () {
                   state.logoutUser();
                   Navigator.of(context).pushAndRemoveUntil(

@@ -118,9 +118,9 @@ class HomeTab extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'REAL-TIME FOUNDATION IMPACT',
-                      style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                    Text(
+                      loc.translate('realtime_impact'),
+                      style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -145,10 +145,10 @@ class HomeTab extends StatelessWidget {
                   mainAxisSpacing: 12,
                   childAspectRatio: 1.6,
                   children: [
-                    _buildStatCard(loc.translate('stat_beneficiaries'), state.impactMetrics['beneficiaries'] ?? '211', Icons.groups),
-                    _buildStatCard(loc.translate('stat_projects'), state.impactMetrics['total_projects'] ?? '2', Icons.account_tree),
-                    _buildStatCard(loc.translate('stat_volunteers'), state.impactMetrics['volunteers'] ?? '19', Icons.volunteer_activism),
-                    _buildStatCard('Funds Raised', state.impactMetrics['funds_raised'] ?? '₹27,912', Icons.currency_rupee),
+                    _buildStatCard(loc.translate('stat_beneficiaries'), state.impactMetrics['beneficiaries'] ?? '210+', Icons.groups),
+                    _buildStatCard(loc.translate('stat_projects'), state.impactMetrics['total_projects'] ?? '2+', Icons.account_tree),
+                    _buildStatCard(loc.translate('stat_volunteers'), state.impactMetrics['volunteers'] ?? '3+', Icons.volunteer_activism),
+                    _buildStatCard(loc.translate('stat_districts'), state.impactMetrics['districts'] ?? '1+', Icons.map),
                   ],
                 ),
               ],
@@ -169,7 +169,7 @@ class HomeTab extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: const Icon(Icons.local_hospital, color: AppTheme.amberGold, size: 18),
-                    label: const Text('Health Camps', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    label: Text(loc.translate('health_camps'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -188,7 +188,7 @@ class HomeTab extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     icon: const Icon(Icons.folder_shared, color: AppTheme.goldAccent, size: 18),
-                    label: const Text('Docs & Receipts', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    label: Text(loc.translate('docs_and_receipts'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -207,9 +207,9 @@ class HomeTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'SPECIALIZED PORTALS & ANALYTICS',
-                  style: TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
+                Text(
+                  loc.translate('specialized_portals'),
+                  style: const TextStyle(color: AppTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -228,11 +228,11 @@ class HomeTab extends StatelessWidget {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Icon(Icons.corporate_fare, color: AppTheme.amberGold, size: 22),
-                              SizedBox(height: 6),
-                              Text('CSR Partner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                              Text('Proposals & Budgets', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            children: [
+                              const Icon(Icons.corporate_fare, color: AppTheme.amberGold, size: 22),
+                              const SizedBox(height: 6),
+                              Text(loc.translate('csr_dashboard'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                              Text(loc.translate('csr_proposals'), style: const TextStyle(color: Colors.white54, fontSize: 10)),
                             ],
                           ),
                         ),
@@ -253,11 +253,11 @@ class HomeTab extends StatelessWidget {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Icon(Icons.local_hospital, color: Colors.lightBlueAccent, size: 22),
-                              SizedBox(height: 6),
-                              Text('Hospital/School', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                              Text('Referrals & Camps', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            children: [
+                              const Icon(Icons.local_hospital, color: Colors.lightBlueAccent, size: 22),
+                              const SizedBox(height: 6),
+                              Text(loc.translate('hospital_education_portal'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                              Text(loc.translate('referrals'), style: const TextStyle(color: Colors.white54, fontSize: 10)),
                             ],
                           ),
                         ),
@@ -278,11 +278,11 @@ class HomeTab extends StatelessWidget {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 22),
-                              SizedBox(height: 6),
-                              Text('AI Analytics', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                              Text('Summaries & Anomalies', style: TextStyle(color: Colors.white54, fontSize: 10)),
+                            children: [
+                              const Icon(Icons.auto_awesome, color: Colors.purpleAccent, size: 22),
+                              const SizedBox(height: 6),
+                              Text(loc.translate('ai_analytics'), maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                              Text(loc.translate('report_summaries'), style: const TextStyle(color: Colors.white54, fontSize: 10)),
                             ],
                           ),
                         ),
@@ -307,7 +307,7 @@ class HomeTab extends StatelessWidget {
                 ),
                 TextButton(
                   onPressed: () => onNavigateTab(1),
-                  child: const Text('View All', style: TextStyle(color: AppTheme.amberGold)),
+                  child: Text(loc.translate('view_all'), style: const TextStyle(color: AppTheme.amberGold)),
                 ),
               ],
             ),

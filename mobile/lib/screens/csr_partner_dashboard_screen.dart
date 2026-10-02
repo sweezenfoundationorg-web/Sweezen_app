@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
 import '../theme/app_theme.dart';
+import '../localization/app_localizations.dart';
 
 class CsrPartnerDashboardScreen extends StatefulWidget {
   const CsrPartnerDashboardScreen({Key? key}) : super(key: key);
@@ -101,11 +102,12 @@ class _CsrPartnerDashboardScreenState extends State<CsrPartnerDashboardScreen> w
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppStateProvider>(context);
+    final loc = AppLocalizations(state.currentLanguage);
 
     return Scaffold(
       backgroundColor: AppTheme.primaryNavy,
       appBar: AppBar(
-        title: const Text('CSR Partner Dashboard'),
+        title: Text(loc.translate('csr_dashboard')),
         backgroundColor: AppTheme.primaryNavy,
         bottom: TabBar(
           controller: _tabController,
@@ -113,11 +115,11 @@ class _CsrPartnerDashboardScreenState extends State<CsrPartnerDashboardScreen> w
           indicatorColor: AppTheme.amberGold,
           labelColor: AppTheme.amberGold,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(icon: Icon(Icons.description), text: 'Proposals'),
-            Tab(icon: Icon(Icons.account_balance_wallet), text: 'Approved Budgets'),
-            Tab(icon: Icon(Icons.flag), text: 'Milestones'),
-            Tab(icon: Icon(Icons.pie_chart), text: 'Utilization Reports'),
+          tabs: [
+            Tab(icon: const Icon(Icons.description), text: loc.translate('csr_proposals')),
+            Tab(icon: const Icon(Icons.account_balance_wallet), text: loc.translate('csr_budgets')),
+            Tab(icon: const Icon(Icons.flag), text: loc.translate('csr_milestones')),
+            Tab(icon: const Icon(Icons.pie_chart), text: loc.translate('csr_utilization')),
           ],
         ),
       ),
@@ -139,7 +141,7 @@ class _CsrPartnerDashboardScreenState extends State<CsrPartnerDashboardScreen> w
         backgroundColor: AppTheme.amberGold,
         foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
-        label: const Text('New CSR Proposal', style: TextStyle(fontWeight: FontWeight.bold)),
+        label: Text(loc.translate('new_proposal'), style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }
