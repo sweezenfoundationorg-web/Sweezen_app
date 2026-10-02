@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_state_provider.dart';
+import '../localization/app_localizations.dart';
 import '../theme/app_theme.dart';
 import '../widgets/sweezen_header.dart';
 import '../widgets/ask_sweezen_sheet.dart';
@@ -44,7 +45,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = Provider.of<AppStateProvider>(context);
+    final loc = AppLocalizations(state.currentLanguage);
 
     final List<Widget> tabs = [
       HomeTab(onNavigateTab: _onTabTapped),
@@ -87,7 +88,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
               Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder: (_) => const EventsScreen()));
             }),
-            _buildDrawerItem(Icons.qr_code_2, 'Humanity Smart ID', () {
+            _buildDrawerItem(Icons.qr_code_2, loc.translate('humanity_card'), () {
               Navigator.pop(context);
               Navigator.push(context, MaterialPageRoute(builder: (_) => const HumanityCardScreen()));
             }),
@@ -105,7 +106,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
             }),
             const Divider(color: Colors.white12),
 
-            _buildDrawerItem(Icons.smart_toy, 'Ask Sweezen AI Assistant', () {
+            _buildDrawerItem(Icons.smart_toy, loc.translate('ask_sweezen'), () {
               Navigator.pop(context);
               _openAiChatbot();
             }, isGold: true),
@@ -134,7 +135,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
         foregroundColor: Colors.black,
         elevation: 6,
         icon: const Icon(Icons.smart_toy),
-        label: const Text('Ask Sweezen AI', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        label: Text(loc.translate('ask_sweezen'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
         onPressed: _openAiChatbot,
       ),
 
@@ -142,12 +143,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_tree), label: 'Projects'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Donate'),
-          BottomNavigationBarItem(icon: Icon(Icons.volunteer_activism), label: 'Volunteer'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home), label: loc.translate('nav_home')),
+          BottomNavigationBarItem(icon: const Icon(Icons.account_tree), label: loc.translate('nav_projects')),
+          BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: loc.translate('nav_donate')),
+          BottomNavigationBarItem(icon: const Icon(Icons.volunteer_activism), label: loc.translate('nav_volunteer')),
+          BottomNavigationBarItem(icon: const Icon(Icons.person), label: loc.translate('nav_profile')),
         ],
       ),
     );

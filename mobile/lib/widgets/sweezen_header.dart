@@ -11,6 +11,91 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(65);
 
+  static const Map<String, String> _languagesMap = {
+    'en': 'English',
+    'hi': 'हिन्दी (Hindi)',
+    'bn': 'বাংলা (Bengali)',
+    'pa': 'ਪੰਜਾਬੀ (Punjabi)',
+    'mr': 'मराठी (Marathi)',
+    'gu': 'ગુજરાતી (Gujarati)',
+    'ta': 'தமிழ் (Tamil)',
+    'te': 'తెలుగు (Telugu)',
+    'kn': 'ಕನ್ನಡ (Kannada)',
+    'ml': 'മലയാളം (Malayalam)',
+    'or': 'ଓଡ଼ିଆ (Odia)',
+    'ur': 'اردو (Urdu)'
+  };
+
+  void _showLanguagePickerModal(BuildContext context, AppStateProvider state) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.cardNavy,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.amberGold,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Row(
+                children: [
+                  Icon(Icons.language, color: AppTheme.amberGold, size: 22),
+                  SizedBox(width: 10),
+                  Text(
+                    'Select App Language (12 Languages)',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: _languagesMap.length,
+                  separatorBuilder: (c, i) => const Divider(color: Colors.white12, height: 1),
+                  itemBuilder: (c, i) {
+                    final code = _languagesMap.keys.elementAt(i);
+                    final name = _languagesMap.values.elementAt(i);
+                    final isSelected = state.currentLanguage == code;
+
+                    return ListTile(
+                      dense: true,
+                      title: Text(
+                        name,
+                        style: TextStyle(
+                          color: isSelected ? AppTheme.goldAccent : Colors.white,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 14,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? const Icon(Icons.check_circle, color: AppTheme.amberGold, size: 20)
+                          : const Icon(Icons.radio_button_unchecked, color: Colors.white30, size: 18),
+                      onTap: () {
+                        state.toggleLanguage(code);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = Provider.of<AppStateProvider>(context);
@@ -42,7 +127,7 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: const [
               Text(
                 'SWEEZEN',
                 style: TextStyle(
@@ -52,7 +137,7 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
                   letterSpacing: 1.5,
                 ),
               ),
-              const Text(
+              Text(
                 'FOUNDATION',
                 style: TextStyle(
                   color: AppTheme.textMuted,
@@ -66,7 +151,7 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        // Language Toggle Switcher (EN ↔ HI)
+        // 12-Language Selector Button in Header
         Container(
           margin: const EdgeInsets.only(right: 6),
           child: TextButton.icon(
@@ -75,12 +160,12 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
               backgroundColor: AppTheme.cardNavy,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: AppTheme.goldAccent.withOpacity(0.4)),
+                side: BorderSide(color: AppTheme.goldAccent.withValues(alpha: 0.4)),
               ),
             ),
             icon: const Icon(Icons.language, color: AppTheme.amberGold, size: 16),
             label: Text(
-              state.currentLanguage == 'en' ? 'HI' : 'EN',
+              state.currentLanguage.toUpperCase(),
               style: const TextStyle(
                 color: AppTheme.textWhite,
                 fontWeight: FontWeight.bold,
@@ -88,8 +173,7 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             onPressed: () {
-              final newLang = state.currentLanguage == 'en' ? 'hi' : 'en';
-              state.toggleLanguage(newLang);
+              _showLanguagePickerModal(context, state);
             },
           ),
         ),
@@ -134,13 +218,13 @@ class SweezenHeader extends StatelessWidget implements PreferredSizeWidget {
           backgroundColor: AppTheme.cardNavy,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: AppTheme.goldAccent.withOpacity(0.5)),
+            side: BorderSide(color: AppTheme.goldAccent.withValues(alpha: 0.5)),
           ),
-          title: Row(
-            children: const [
+          title: const Row(
+            children: [
               Icon(Icons.notifications_active, color: AppTheme.amberGold),
               SizedBox(width: 10),
-              Text('Notifications', style: TextStyle(color: Colors.white, fontSize: 18)),
+              Text('Smart Notifications', style: TextStyle(color: Colors.white, fontSize: 18)),
             ],
           ),
           content: SizedBox(

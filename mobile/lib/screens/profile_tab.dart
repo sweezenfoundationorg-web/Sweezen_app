@@ -197,11 +197,21 @@ class _ProfileTabState extends State<ProfileTab> {
               trailing: DropdownButton<String>(
                 value: state.currentLanguage,
                 dropdownColor: AppTheme.cardNavy,
-                style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: AppTheme.amberGold, fontWeight: FontWeight.bold, fontSize: 12),
                 underline: const SizedBox(),
                 items: const [
-                  DropdownMenuItem(value: 'en', child: Text('English (EN)')),
-                  DropdownMenuItem(value: 'hi', child: Text('हिन्दी (HI)')),
+                  DropdownMenuItem(value: 'en', child: Text('English')),
+                  DropdownMenuItem(value: 'hi', child: Text('हिन्दी (Hindi)')),
+                  DropdownMenuItem(value: 'bn', child: Text('বাংলা (Bengali)')),
+                  DropdownMenuItem(value: 'pa', child: Text('ਪੰਜਾਬੀ (Punjabi)')),
+                  DropdownMenuItem(value: 'mr', child: Text('मराठी (Marathi)')),
+                  DropdownMenuItem(value: 'gu', child: Text('ગુજરાતી (Gujarati)')),
+                  DropdownMenuItem(value: 'ta', child: Text('தமிழ் (Tamil)')),
+                  DropdownMenuItem(value: 'te', child: Text('తెలుగు (Telugu)')),
+                  DropdownMenuItem(value: 'kn', child: Text('ಕನ್ನಡ (Kannada)')),
+                  DropdownMenuItem(value: 'ml', child: Text('മലയാളം (Malayalam)')),
+                  DropdownMenuItem(value: 'or', child: Text('ଓଡ଼ିଆ (Odia)')),
+                  DropdownMenuItem(value: 'ur', child: Text('اردو (Urdu)')),
                 ],
                 onChanged: (val) {
                   if (val != null) state.toggleLanguage(val);
